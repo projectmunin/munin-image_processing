@@ -1,4 +1,4 @@
 munin-image_processing
 ======================
 
-HEJ FIBE BUU
+The image processing repository for Project Munin.
