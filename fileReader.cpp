@@ -5,20 +5,6 @@
 #include <sys/types.h>
 #include "dirent.h"
 
-#ifdef _WIN32
-#include <Windows.h>
-#define WINDOWS true
-#endif
-/*
-#else
-#ifdef
-
-#include "dirent.h"
-#define WINDOWS false
-#endif
-#endif
-*/
-
 using namespace std;
 
 struct rgb8 
