@@ -18,5 +18,12 @@
 ### Ignores everything in the VisualStudio solution ###
 ### Unless it is a a *.cpp file                     ###
 #######################################################
-EdgeDetection/*
-!EdgeDetection/*.cpp
+#EdgeDetection/*
+#!*.cpp
+#!*.h
+*.opensdf
+*.sdf
+*.sln
+*.suo
+*.vcxproj
+*.vcxproj.filters
