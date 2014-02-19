@@ -17,20 +17,20 @@
 #include <string>
 #include <stdio.h>
 
-#include "utility.cpp"
+#include "imgutil.cpp"
 
 
 class weightTemplate
 {
 	public:
-	unsigned char **weights;
+	char **weights;
 
-	weightTemplate(unsigned char **weights)
+	weightTemplate(char **weights)
 	{
 		this->weights=weights;
 	}
 	
-	weightTemplate(unsigned char *weightValues)
+	weightTemplate(char *weightValues)
 	{
 
 		weights[0][0] = weightValues[0];
@@ -59,45 +59,99 @@ class weightTemplate
 };
 
 
-image templateDetect(image *imageData)
+grayImage templateDetect(image *imageData, char posWeight, char negWeight)
 {
 
-	unsigned char weights1[] = {1,2,1,0,0,0,0,0,0};
-	weightTemplate templateNorth = weightTemplate(weights);
+	char weights1[] = {posWeight,	posWeight,	posWeight,
+						negWeight,	0,			negWeight,
+						negWeight,	negWeight,	negWeight};
+	weightTemplate templateNorth = weightTemplate(weights1);
 
-	unsigned char weights2 = {0,1,2,0,0,1,0,0,0};
-	weightTemplate templateNorthEast = weightTemplate(weights);
+	char weights2[] = {negWeight,	posWeight,	posWeight,
+						negWeight,	0,			posWeight,
+						negWeight,	negWeight,	negWeight};
+	weightTemplate templateNorthEast = weightTemplate(weights2);
 
-	unsigned char weights3[] = {0,0,1,0,0,2,0,0,1};
-	weightTemplate templateEast = weightTemplate(weights);
+	char weights3[] = {negWeight,	negWeight,	posWeight,
+						negWeight,	0,			posWeight,
+						negWeight,	negWeight,	posWeight};
+	weightTemplate templateEast = weightTemplate(weights3);
 
-	unsigned char weights4[] = {0,0,0,0,0,1,0,1,2};
-	weightTemplate templateSouthEast = weightTemplate(weights);
+	char weights4[] = {negWeight,	negWeight,	negWeight,
+						negWeight,	0,			posWeight,
+						negWeight,	posWeight,	posWeight};
+	weightTemplate templateSouthEast = weightTemplate(weights4);
 
-	unsigned char weights5[] = {0,0,0,0,0,0,1,2,1};
-	weightTemplate templateSouth = weightTemplate(weights);
+	char weights5[] = {negWeight,	negWeight,	negWeight,
+						negWeight,	0,			negWeight,
+						posWeight,	posWeight,	posWeight};
+	weightTemplate templateSouth = weightTemplate(weights5);
 
-	unsigned char weights6[] = {0,0,0,1,0,0,2,1,0};
-	weightTemplate templateSouthWest = weightTemplate(weights);
+	char weights6[] = {negWeight,	negWeight,	negWeight,
+						posWeight,	0,			negWeight,
+						posWeight,	posWeight,	negWeight};
+	weightTemplate templateSouthWest = weightTemplate(weights6);
 
-	unsigned char weights7[] = {1,0,0,2,0,0,1,0,0};
-	weightTemplate templateWest = weightTemplate(weights);
+	char weights7[] = {posWeight,	negWeight,	negWeight,
+						posWeight,	0,			negWeight,
+						posWeight,	negWeight,	negWeight};
+	weightTemplate templateWest = weightTemplate(weights7);
 
-	unsigned char weights8[] = {2,1,0,1,0,0,0,0,0};
-	weightTemplate templateNorthWest = weightTemplate(weights);
+	char weights8[] = {posWeight,	posWeight,	negWeight,
+						posWeight,	0,			negWeight,
+						negWeight,	negWeight,	negWeight};
+	weightTemplate templateNorthWest = weightTemplate(weights8);
+
+
+	weightTemplate allTemplates[] = {templateNorthWest, templateNorth, templateNorthEast,
+									templateEast,						templateSouthEast,
+									templateSouth, templateSouthWest, templateWest};
 
 
 
-	rgb8 **colorData = imageData->p;
-	rgb8 **edgePixels = new rgb8*[imageData->width];
-	for(int k=0;k<imageData->width;k++)
+	grayscaleFilter(imageData);
+
+	int width = imageData->width;
+	int height = imageData->height;
+	rgb8 **colorData = imageData->pixel;
+	unsigned char **edgePixels = new unsigned char*[width];
+	for(int k=0; k < width; k++)
 	{
-		edgePixels[k] = new rgb8[imageData->height];
-	};
+		edgePixels[k] = new unsigned char[height];
+	}
 
 
+	for (int k=0; k<9; k++)
+	{
+		weightTemplate weights = allTemplates[k];
+
+		for (int y = 0; y < height; y++)
+		{
+			for (int x = 0; x < width; x++)
+			{
+				if (x != 0 && x != width && y != 0 && y != height)
+				{
+					int sum = 0;
+					for (int i = 0; i < 9; i++)
+					{
+						sum += weights[i] * colorData[(x-1+i%3)][(y-1+i/3)].red;
+					}
+
+					if (sum > edgePixels[x][y])
+					{
+						edgePixels[x][y] = sum;
+					}
+				}
+				else
+				{
+					edgePixels[x][y] = 0;
+				}
+			}
+		}
+
+	}
 
 
-	return image(imageData->date,imageData->height,imageData->width,edgePixels);
+	return grayImage(width, height, edgePixels);
 
 }

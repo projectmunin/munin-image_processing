@@ -1,90 +1,19 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-
-#include <sys/types.h>
-#include "dirent.h"
+#include "fileReader.h"
 
 using namespace std;
 
-struct rgb8 
+///[OLD]Reads the first .rgb-file in the default folder and returns a pointer to an image represented as a two dimensional array if a .rgb-file is found. 
+///[OLD]Returns NULL if a .rgb-file is not detected.
+
+///Reads the rgb-file from the path.
+image *readImageFile(string path)
 {
-	unsigned char red;
-	unsigned char green;
-	unsigned char blue;
-};
 
-class image
-{
-	public:
-	string date;
-	int width;
-	int height;
-	rgb8 **p;
-
-	image(string date, int width, int height, rgb8 **p)
-	{
-		this->date=date;
-		this->width=width;
-		this->height=height;
-		this->p=p;
-	}
-
-	~image()
-	{
-		for(int i=0;i<width;i++)
-		{
-			delete p[i];
-		}
-		delete p;
-	}
-
-};
-
-enum fileType
-{
-	RGB,PPM 
-};
-
-///Reads the first .rgb-file in the default folder and returns a pointer to an image represented as a two dimensional array if a .rgb-file is found. 
-///Returns NULL if a .rgb-file is not detected.
-image *readImageFile() 
-{
-	string fileName;
+	string pathRev = reverseString(path);
+	string date = reverseString(pathRev.substr(15,19));
+	int width = atoi(reverseString(pathRev.substr(9,4)).c_str());  //Template YYYY_MM_DD'HH_MM'SS_UU'wWWWWhHHHH.rgb where WWWW is width and HHHH is height.
+	int height = atoi(reverseString(pathRev.substr(4,4)).c_str());
 	
-	DIR *dir;
-	class dirent *ent;
-
-	dir = opendir("Files\\");
-	ent = readdir(dir);
-
-	bool found = false;
-	while(ent != NULL&&!found)
-	{
-		string file = ent->d_name;
-
-		int finding = file.find(".rgb");
-		if(finding != string::npos)
-		{
-			fileName = file;
-			found = true;
-		}
-		else
-		{
-			ent = readdir(dir);
-		}
-	}
-	closedir(dir);
-	if(ent == NULL)
-	{
-		return NULL;
-	}
-
-	string date = fileName.substr(0,22);
-	int width = atoi(fileName.substr(24,4).c_str());  //Template YYYY_MM_DD'HH_MM'SS_UU'wWWWW'hHHHH.rgb where WWWW is width and HHHH is height.
-	int height = atoi(fileName.substr(29,4).c_str());
-
-
 	rgb8 **p = new rgb8*[width];
 	for(int k=0;k<width;k++)
 	{
@@ -92,7 +21,7 @@ image *readImageFile()
 	}
 
 	ifstream myFile;
-	myFile.open("Files\\"+fileName, ios::in | ios::binary | ios::ate);
+	myFile.open(path, ios::in | ios::binary | ios::ate);
 
 	streampos size;
 	char *memblock;
@@ -120,11 +49,51 @@ image *readImageFile()
 		delete[] memblock;
 	}
 	return new image(date,width,height,p);
+
 }
 
-void writeImagePPM(image *img, fileType type)
+
+///Reads the next rgb-file in the folder pointed by path.
+image *readNextImageFile(string path)
 {
-	if(img->p==nullptr||img->height<1||img->width<1)
+	string fileName;
+	
+
+	DIR *dir;
+	class dirent *ent;
+
+	dir = opendir(path.c_str());
+	ent = readdir(dir);
+
+	bool found = false;
+	while(ent != NULL&&!found)
+	{
+		string file = ent->d_name;
+
+		int finding = file.find(".rgb");
+		if(finding != string::npos)
+		{
+			fileName = file;
+			found = true;
+		}
+		else
+		{
+			ent = readdir(dir);
+		}
+	}
+	closedir(dir);
+	if(ent == NULL)
+	{
+		return NULL;
+	}
+
+	return readImageFile(path+fileName);
+	
+}
+
+void writeImagePPM(string path, image *img, fileType type)
+{
+	if(img->pixel==nullptr||img->height<1||img->width<1)
 	{
 		cout<<"Image parameters where not correct."<<endl;
 		return;
@@ -142,10 +111,10 @@ void writeImagePPM(image *img, fileType type)
 	}
 
 	//Template YYYY_MM_DD'HH_MM'SS_UU'wWWWW'hHHHH.ppm where WWWW is width and HHHH is height.
-	string fileName = img->date + "'w" + to_string(img->width) + "h" + to_string(img->height) + fileEnding;
+	string fileName = img->date + "-w" + to_string(img->width) + "h" + to_string(img->height) + fileEnding;
 
 	ofstream file;
-	file.open("Files\\"+fileName, ios::binary);
+	file.open(path+fileName, ios::binary);
 	int size = img->width*img->height*3;
 	char *memblock = new char[size];
 
@@ -155,9 +124,9 @@ void writeImagePPM(image *img, fileType type)
 		for(int j=0;j<img->width;j++)
 		{
 			int n = offset+j*3;
-			memblock[n+0] = img->p[j][i].red;
-			memblock[n+1] = img->p[j][i].green;
-			memblock[n+2] = img->p[j][i].blue;
+			memblock[n+0] = img->pixel[j][i].red;
+			memblock[n+1] = img->pixel[j][i].green;
+			memblock[n+2] = img->pixel[j][i].blue;
 		}
 	}
 	
@@ -177,49 +146,21 @@ void writeImagePPM(image *img, fileType type)
 	delete[] memblock;
 }
 
-void binaryFilter(image *img)
-{
-	for(int i=0;i<img->width;i++)
-	{
-		for(int j=0;j<img->height;j++)
-		{
-			img->p[i][j].red = img->p[i][j].green = img->p[i][j].blue = (img->p[i][j].red + img->p[i][j].green + img->p[i][j].blue)/3;
-		}
-	}
-}
-
-void invertFilter(image *img)
-{
-	for(int i=0;i<img->width;i++)
-	{
-		for(int j=0;j<img->height;j++)
-		{
-			img->p[i][j].red = 255-img->p[i][j].red;
-			img->p[i][j].green = 255-img->p[i][j].green;
-			img->p[i][j].blue = 255-img->p[i][j].blue;
-		}
-	}
-}
 
 int main()
 {
 	image *img;
-	
-	
-	img = readImageFile();
-	if(img == NULL)
-	{
-		cout<<"No relevant file was found."<<endl;
-		system("pause");
-		return -1;
-	}
+
+	//img=readNextImageFile("Files\\");
+	img=readImageFile("Input\\2014_02_18-13_32-21-w2592h1936.rgb");
 
 	invertFilter(img);
 
 	fileType outType = PPM;
-	writeImagePPM(img,outType);
+	writeImagePPM("Output\\",img,outType);
 
 	delete img;
-	system("pause");
+
+	//system("pause");
 	return 0;
 }

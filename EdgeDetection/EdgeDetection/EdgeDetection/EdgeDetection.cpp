@@ -17,7 +17,11 @@
 #include <string>
 #include <stdio.h>
 
+#include "imgutil.h"
+
 #include "filereader.h"
+
+#include "templateDetection.h"
 
 
 using namespace std;
@@ -30,6 +34,7 @@ int main( void )
 	// hämta test fil som image
 
 	// Olika edgedetection tester
+	grayImage templateDetectionEdges = templateDetection(image, 5, -3);
 
 	// Spara edge filerna i ett sorterat sätt så man vet vilken som är vilken
 

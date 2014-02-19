@@ -1,28 +1,17 @@
-
-#include "utility.h"
+#ifndef FILEREADER_H
+#define FILEREADER_H
 #include <iostream>
 #include <fstream>
 #include <string>
-
 #include <sys/types.h>
 #include "dirent.h"
+#include "imgutil.h"
+#include "strutil.h"
 
-using namespace std;
 
 
-enum fileType
-{
-	RGB,PPM 
-};
+image *readImageFile(string path);
+image *readNextImageFile(string path);
+void writeImagePPM(string path, image *img, fileType type);
 
-///Reads the first .rgb-file in the default folder and returns a pointer to an image represented as a two dimensional array if a .rgb-file is found. 
-///Returns NULL if a .rgb-file is not detected.
-image *readImageFile();
-
-void writeImagePPM(image *img, fileType type);
-
-void binaryFilter(image *img);
-
-void invertFilter(image *img);
-
-int main();
+#endif
