@@ -1,57 +1,74 @@
+
 #include "imgutil.h"
 
 using namespace std;
 
-class image
+
+// classes
+
+image::image(string date, int width, int height, rgb8 **pixel)
 {
-	public:
-	string date;
-	int width;
-	int height;
-	rgb8 **pixel;
+	this->date=date;
+	this->width=width;
+	this->height=height;
+	this->pixel=pixel;
+}
 
-	image(string date, int width, int height, rgb8 **pixel)
-	{
-		this->date=date;
-		this->width=width;
-		this->height=height;
-		this->pixel=pixel;
-	}
-
-	~image()
-	{
-		for(int i=0;i<width;i++)
-		{
-			delete pixel[i];
-		}
-		delete pixel;
-	}
-
-};
-
-class grayImage
+image::image(string date, int width, int height, unsigned char **grayPixel)
 {
-	public:
-	int width;
-	int height;
-	unsigned char **pixel;
+	this->date=date;
+	this->width=width;
+	this->height=height;
 
-	grayImage(int width, int height, unsigned char **pixel)
+	this->pixel = grayToColor(grayPixel, width, height);
+}
+
+image::~image()
+{
+	for(int i=0;i<width;i++)
 	{
-		this->width=width;
-		this->height=height;
-		this->pixel=pixel;
+		delete pixel[i];
 	}
+	delete pixel;
+}
 
-	~grayImage()
+grayImage::grayImage(int width, int height, unsigned char **pixel)
+{
+	this->width=width;
+	this->height=height;
+	this->pixel=pixel;
+}
+
+grayImage::~grayImage()
+{
+	for(int i=0;i<width;i++)
 	{
-		for(int i=0;i<width;i++)
+		delete pixel[i];
+	}
+	delete pixel;
+}
+
+
+
+// functions
+
+
+rgb8** grayToColor(unsigned char** grayData, int width, int height)
+{
+	rgb8 **colorData = new rgb8*[width];
+	for(int x=0; x < width; x++)
+	{
+		colorData[x] = new rgb8[height];
+		for (int y = 0; y < height; y++)
 		{
-			delete pixel[i];
+			colorData[x][y].red = grayData[x][y];
+			colorData[x][y].green = grayData[x][y];
+			colorData[x][y].blue = grayData[x][y];
 		}
-		delete pixel;
 	}
-};
+
+	return colorData;
+}
 
 
 void grayscaleFilter(image *img)

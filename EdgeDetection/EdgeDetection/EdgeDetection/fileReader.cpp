@@ -146,7 +146,7 @@ void writeImagePPM(string path, image *img, fileType type)
 	delete[] memblock;
 }
 
-
+/*
 int main()
 {
 	image *img;
@@ -163,4 +163,4 @@ int main()
 
 	//system("pause");
 	return 0;
-}
+}*/

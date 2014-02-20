@@ -12,98 +12,89 @@
 ***************************************************************************************************/
 
 
-
-#include <iostream>
-#include <string>
-#include <stdio.h>
-
-#include "imgutil.cpp"
+#include "templateDetection.h"
 
 
-class weightTemplate
+weightTemplate::weightTemplate(char **weights)
 {
-	public:
-	char **weights;
-
-	weightTemplate(char **weights)
-	{
-		this->weights=weights;
-	}
+	this->weights=weights;
+}
 	
-	weightTemplate(char *weightValues)
-	{
-
-		weights[0][0] = weightValues[0];
-		weights[0][1] = weightValues[1];
-		weights[0][2] = weightValues[2];
-	
-		weights[1][0] = weightValues[3];
-		weights[1][1] = weightValues[4];
-		weights[1][2] = weightValues[5];
-
-		weights[2][0] = weightValues[6];
-		weights[2][1] = weightValues[7];
-		weights[2][2] = weightValues[8];
-
-	}
-
-	~weightTemplate()
-	{
-		for(int i=0;i<3;i++)
-		{
-			delete weights[i];
-		}
-		delete weights;
-	}
-
-};
-
-
-grayImage templateDetect(image *imageData, char posWeight, char negWeight)
+weightTemplate::weightTemplate(char *weightValues)
 {
+	weights = new char*[3];
+	for(int k=0; k < 3; k++)
+	{
+		weights[k] = new char[3];
+	}
+
+	weights[0][0] = weightValues[0];
+	weights[0][1] = weightValues[1];
+	weights[0][2] = weightValues[2];
+	
+	weights[1][0] = weightValues[3];
+	weights[1][1] = weightValues[4];
+	weights[1][2] = weightValues[5];
+
+	weights[2][0] = weightValues[6];
+	weights[2][1] = weightValues[7];
+	weights[2][2] = weightValues[8];
+}
+
+weightTemplate::~weightTemplate()
+{
+	for(int i=0;i<3;i++)
+	{
+		delete weights[i];
+	}
+	delete weights;
+}
+
+image *templateDetect(image *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+{
+
+	char weights0[] = {posWeight,	posWeight,	negWeight,
+						posWeight,	0,			negWeight,
+						negWeight,	negWeight,	negWeight};
+	weightTemplate *templateNorthWest	= new weightTemplate(weights0);
 
 	char weights1[] = {posWeight,	posWeight,	posWeight,
 						negWeight,	0,			negWeight,
 						negWeight,	negWeight,	negWeight};
-	weightTemplate templateNorth = weightTemplate(weights1);
+	weightTemplate *templateNorth		= new weightTemplate(weights1);
 
 	char weights2[] = {negWeight,	posWeight,	posWeight,
 						negWeight,	0,			posWeight,
 						negWeight,	negWeight,	negWeight};
-	weightTemplate templateNorthEast = weightTemplate(weights2);
+	weightTemplate *templateNorthEast	= new weightTemplate(weights2);
 
 	char weights3[] = {negWeight,	negWeight,	posWeight,
 						negWeight,	0,			posWeight,
 						negWeight,	negWeight,	posWeight};
-	weightTemplate templateEast = weightTemplate(weights3);
+	weightTemplate *templateEast		= new weightTemplate(weights3);
 
 	char weights4[] = {negWeight,	negWeight,	negWeight,
 						negWeight,	0,			posWeight,
 						negWeight,	posWeight,	posWeight};
-	weightTemplate templateSouthEast = weightTemplate(weights4);
+	weightTemplate *templateSouthEast	= new weightTemplate(weights4);
 
 	char weights5[] = {negWeight,	negWeight,	negWeight,
 						negWeight,	0,			negWeight,
 						posWeight,	posWeight,	posWeight};
-	weightTemplate templateSouth = weightTemplate(weights5);
+	weightTemplate *templateSouth		= new weightTemplate(weights5);
 
 	char weights6[] = {negWeight,	negWeight,	negWeight,
 						posWeight,	0,			negWeight,
 						posWeight,	posWeight,	negWeight};
-	weightTemplate templateSouthWest = weightTemplate(weights6);
+	weightTemplate *templateSouthWest	= new weightTemplate(weights6);
 
 	char weights7[] = {posWeight,	negWeight,	negWeight,
 						posWeight,	0,			negWeight,
 						posWeight,	negWeight,	negWeight};
-	weightTemplate templateWest = weightTemplate(weights7);
-
-	char weights8[] = {posWeight,	posWeight,	negWeight,
-						posWeight,	0,			negWeight,
-						negWeight,	negWeight,	negWeight};
-	weightTemplate templateNorthWest = weightTemplate(weights8);
+	weightTemplate *templateWest		= new weightTemplate(weights7);
 
 
-	weightTemplate allTemplates[] = {templateNorthWest, templateNorth, templateNorthEast,
+	weightTemplate *allTemplates[] = {templateNorthWest, templateNorth, templateNorthEast,
 									templateEast,						templateSouthEast,
 									templateSouth, templateSouthWest, templateWest};
 
@@ -114,44 +105,184 @@ grayImage templateDetect(image *imageData, char posWeight, char negWeight)
 	int width = imageData->width;
 	int height = imageData->height;
 	rgb8 **colorData = imageData->pixel;
-	unsigned char **edgePixels = new unsigned char*[width];
-	for(int k=0; k < width; k++)
+
+
+	/// The unscaled (not unsigned char) grayscale data
+	int **unscaledContrastPixels = new int*[width];
+	for(int x=0; x < width; x++)
 	{
-		edgePixels[k] = new unsigned char[height];
+		unscaledContrastPixels[x] = new int[height];
+		for(int y=0; y < height; y++)
+		{
+			unscaledContrastPixels[x][y] = NULL;
+		}
+	}
+
+	/// The contrast image.
+	unsigned char **contrastPixels = new unsigned char*[width];
+	for(int x=0; x < width; x++)
+	{
+		contrastPixels[x] = new unsigned char[height];
+		for(int y=0; y < height; y++)
+		{
+			contrastPixels[x][y] = 0;
+		}
+	}
+
+	/// The binary edge image
+	unsigned char **edgePixels = new unsigned char*[width];
+	for(int x=0; x < width; x++)
+	{
+		edgePixels[x] = new unsigned char[height];
+		for(int y=0; y < height; y++)
+		{
+			edgePixels[x][y] = 0;
+		}
 	}
 
 
-	for (int k=0; k<9; k++)
+	bool **lockedEdges = new bool*[width];
+	for(int x=0; x < width; x++)
 	{
-		weightTemplate weights = allTemplates[k];
-
-		for (int y = 0; y < height; y++)
+		lockedEdges[x] = new bool[height];
+		for(int y=0; y < height; y++)
 		{
-			for (int x = 0; x < width; x++)
+			lockedEdges[x][y] = false;
+		}
+	}
+
+	bool **lowEdges = new bool*[width];
+	for(int x=0; x < width; x++)
+	{
+		lowEdges[x] = new bool[height];
+		for(int y=0; y < height; y++)
+		{
+			lowEdges[x][y] = false;
+		}
+	}
+
+	queue<int> openEdges;
+
+
+	int lowestEdge = NULL;
+	int highestEdge = NULL;
+	for (int k=0; k<8; k++)
+	{
+		char ** weights = allTemplates[k]->weights;
+
+		for (int x = 0; x < width; x++)
+		{
+			for (int y = 0; y < height; y++)
 			{
-				if (x != 0 && x != width && y != 0 && y != height)
+				if (x != 0 && x != width-1 && y != 0 && y != height-1)
 				{
 					int sum = 0;
 					for (int i = 0; i < 9; i++)
 					{
-						sum += weights[i] * colorData[(x-1+i%3)][(y-1+i/3)].red;
+						sum += weights[i%3][i/3] * colorData[(x-1+i%3)][(y-1+i/3)].red;
 					}
+					lowestEdge = (sum <= lowestEdge || lowestEdge == NULL) ? sum : lowestEdge;
+					highestEdge = (sum >= highestEdge || highestEdge == NULL) ? sum : highestEdge;
 
-					if (sum > edgePixels[x][y])
+					if (sum > unscaledContrastPixels[x][y] || unscaledContrastPixels[x][y] == NULL)
 					{
-						edgePixels[x][y] = sum;
+						unscaledContrastPixels[x][y] = sum;
 					}
 				}
 				else
 				{
-					edgePixels[x][y] = 0;
+					unscaledContrastPixels[x][y] = NULL;
 				}
 			}
 		}
 
 	}
 
+	int edgeDifference = highestEdge - lowestEdge;
+	for (int x = 0; x < width; x++)
+	{
+		for (int y = 0; y < height; y++)
+		{
+			if (unscaledContrastPixels[x][y] == NULL)
+			{
+				contrastPixels[x][y] = 0;
+			}
+			else
+			{
+				contrastPixels[x][y] = 255 * (unscaledContrastPixels[x][y] + lowestEdge) / edgeDifference;
+			}
 
-	return grayImage(width, height, edgePixels);
+			unsigned char pixel = contrastPixels[x][y];
+			if (pixel > highThreshold)
+			{
+				openEdges.push(x + y*width);
+			}
+			else if (pixel > lowThreshold)
+			{
+				lowEdges[x][y] = true;
+			}
+		}
+	}
+
+
+	/// check edges
+	while (!openEdges.empty())
+	{
+		int pos = openEdges.front();
+		int x = (pos % width);
+		int y = (pos / width);
+		//cout << "loop" << endl;
+		/// lock the edge as checked
+		lockedEdges[x][y] = true;
+		openEdges.pop();
+
+		/// Color the edge in the image
+		edgePixels[x][y] = 255;
+
+		for (int i = 0; i < 9; i++)
+		{
+			int neighbourX = (x-1+i%3);
+			int neighbourY = (y-1+i/3);
+			bool isLocked = lockedEdges[neighbourX][neighbourY];
+
+			if (!isLocked)
+			{
+				// x and ys are different!!!!
+				bool isLow = lowEdges[neighbourX][neighbourY];
+
+				if (isLow)
+				{
+					// Add as an unchecked edge
+					openEdges.push(neighbourX + neighbourY*width);
+
+					// remove from the list of low edges to check
+					lowEdges[neighbourX][neighbourY] = false;
+				}
+			}
+		}
+	}
+	
+	
+	image *returnImage = new image(imageData->date, width, height, edgePixels);
+
+	/// Garbage Collection
+	// (change to use a single loop)
+	for(int i = 0; i < width; i++)
+	{
+		delete edgePixels[i];
+		delete unscaledContrastPixels[i];
+		delete contrastPixels[i];
+		delete lockedEdges[i];
+		delete lowEdges[i];
+	}
+	delete edgePixels;
+	delete unscaledContrastPixels;
+	delete contrastPixels;
+	delete lockedEdges;
+	delete lowEdges;
+
+	
+	/// return the edgeimage
+	return returnImage;
 
 }

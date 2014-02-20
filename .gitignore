@@ -27,3 +27,15 @@
 *.suo
 *.vcxproj
 *.vcxproj.filters
+*.exe
+*.tlog
+*.obj
+*.aps
+*.pdb
+*.lastbuildstate
+*.unsuccessfulbuild
+*.idb
+*.log
+*.ilk
+*.ppm
+*.rgb
