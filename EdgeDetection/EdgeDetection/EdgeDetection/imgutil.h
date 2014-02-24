@@ -33,6 +33,7 @@ public:
 	unsigned char **pixel;
 
 	grayImage(int width, int height, unsigned char **pixel);
+	grayImage(image *colorImage);
 
 	~grayImage();
 };

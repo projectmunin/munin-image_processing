@@ -39,6 +39,27 @@ grayImage::grayImage(int width, int height, unsigned char **pixel)
 	this->pixel=pixel;
 }
 
+
+grayImage::grayImage(image *colorImage)
+{
+	this->width = colorImage->width;
+	this->height = colorImage->height;
+
+	rgb8 **colorPixel = colorImage->pixel;
+	unsigned char **pixel = new unsigned char*[width];
+	for(int x=0; x < width; x++)
+	{
+		pixel[x] = new unsigned char[height];
+		for(int y=0;y < height; y++)
+		{
+			pixel[x][y] = (colorPixel[x][y].red + colorPixel[x][y].green + colorPixel[x][y].blue)/3;
+		}
+	}
+
+
+	this->pixel=pixel;
+}
+
 grayImage::~grayImage()
 {
 	for(int i=0;i<width;i++)

@@ -110,14 +110,14 @@ weightTemplate** createTemplates(char posWeight, char negWeight)
 }
 
 
-image* templateContrastImage(image* imageData, char posWeight, char negWeight)
+grayImage* templateContrastImage(grayImage* imageData, char posWeight, char negWeight)
 {
 
 	weightTemplate **allTemplates = createTemplates(posWeight, negWeight);
 
 	int width = imageData->width;
 	int height = imageData->height;
-	rgb8 **colorData = imageData->pixel;
+	unsigned char **pixelData = imageData->pixel;
 
 
 	/// The unscaled (not unsigned char) grayscale data
@@ -159,7 +159,7 @@ image* templateContrastImage(image* imageData, char posWeight, char negWeight)
 					int sum = 0;
 					for (int i = 0; i < 9; i++)
 					{
-						sum += weights[i%3][i/3] * colorData[(x-1+i%3)][(y-1+i/3)].red;
+						sum += weights[i%3][i/3] * pixelData[(x-1+i%3)][(y-1+i/3)];
 					}
 					lowestContrast = (sum <= lowestContrast || lowestContrast == NULL) ? sum : lowestContrast;
 					highestContrast = (sum >= highestContrast || highestContrast == NULL) ? sum : highestContrast;
@@ -194,7 +194,7 @@ image* templateContrastImage(image* imageData, char posWeight, char negWeight)
 		}
 	}
 
-	image *returnImage = new image(imageData->date, width, height, contrastPixels);
+	grayImage *returnImage = new grayImage(width, height, contrastPixels);
 
 	/// Garbage Collection
 	// (change to use a single loop)
@@ -213,14 +213,14 @@ image* templateContrastImage(image* imageData, char posWeight, char negWeight)
 }
 
 
-image* templateEdgeImage(image *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+grayImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
 {
 
 	weightTemplate **allTemplates = createTemplates(posWeight, negWeight);
 
 	int width = imageData->width;
 	int height = imageData->height;
-	rgb8 **colorData = imageData->pixel;
+	unsigned char **pixelData = imageData->pixel;
 
 
 	/// The unscaled (not unsigned char) grayscale data
@@ -295,7 +295,7 @@ image* templateEdgeImage(image *imageData, char posWeight, char negWeight, unsig
 					int sum = 0;
 					for (int i = 0; i < 9; i++)
 					{
-						sum += weights[i%3][i/3] * colorData[(x-1+i%3)][(y-1+i/3)].red;
+						sum += weights[i%3][i/3] * pixelData[(x-1+i%3)][(y-1+i/3)];
 					}
 					lowestEdge = (sum <= lowestEdge || lowestEdge == NULL) ? sum : lowestEdge;
 					highestEdge = (sum >= highestEdge || highestEdge == NULL) ? sum : highestEdge;
@@ -379,7 +379,7 @@ image* templateEdgeImage(image *imageData, char posWeight, char negWeight, unsig
 	}
 
 
-	image *returnImage = new image(imageData->date, width, height, edgePixels);
+	grayImage *returnImage = new grayImage(width, height, edgePixels);
 
 	/// Garbage Collection
 	for(int i = 0; i < width; i++)
@@ -412,15 +412,44 @@ image* templateEdgeImage(image *imageData, char posWeight, char negWeight, unsig
 
 
 
-image* templateDetect(image *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+image* templateDetect(image *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
 {
 	
-	grayscaleFilter(imageData);
+	//grayscaleFilter(colorImage);
 	
+	grayImage *imageData = new grayImage(colorImage);
+
 	// easy to change which kind of image it should output 
 	//image *contrastImage = templateContrastImage(imageData, posWeight, negWeight);
 
-	image *edgeImage = templateEdgeImage(imageData, posWeight, negWeight, highThreshold, lowThreshold);
+	grayImage *redEdgeImage = templateEdgeImage(imageData, posWeight, negWeight, highThreshold, lowThreshold);
+	grayImage *greenEdgeImage = templateEdgeImage(imageData, posWeight, negWeight, highThreshold, lowThreshold);
+	grayImage *blueEdgeImage = templateEdgeImage(imageData, posWeight, negWeight, highThreshold, lowThreshold);
+
+	rgb8 **edgePixels = new rgb8*[colorImage->width];
+	for(int x=0; x < colorImage->width; x++)
+	{
+		edgePixels[x] = new rgb8[colorImage->height];
+		for(int y=0;y < colorImage->height; y++)
+		{
+			unsigned char pixel = ( redEdgeImage->pixel[x][y] * greenEdgeImage->pixel[x][y]
+					* blueEdgeImage->pixel[x][y] ) > 0 ? 255 : 0;
+
+			edgePixels[x][y].red = pixel;
+			edgePixels[x][y].green = pixel;
+			edgePixels[x][y].blue = pixel;
+		}
+	}
+
+	image *edgeImage = new image(colorImage->date, colorImage->width, colorImage->height, edgePixels);
+
+
+	/// Garbage Collection
+	for(int i = 0; i < colorImage->width; i++)
+	{
+		delete edgePixels[i];
+	}
+	delete edgePixels;
 
 
 	return edgeImage;
