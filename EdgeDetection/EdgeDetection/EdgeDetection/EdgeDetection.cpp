@@ -26,27 +26,49 @@
 
 using namespace std;
 
-int main( void )
+
+int main( int argc, char* argv[] )
 {
+
+	cout << "EdgeDetection: main started with " << argc << " arguments." << endl;
+
+	string imageName;
 	
-	cout << "EdgeDetection: main started" << endl;
+	if (argc > 2)
+	{
+		cout << "EdgeDetection: Only takes one image name as parameter (with origin at Input)" << endl;
+		return 0;
+	}
+	else if (argc < 2)
+	{
+
+		cout << "EdgeDetection: no arguments, using hardcoded 'input'" << endl;
+
+		//imageName = "2014_02_11-17_45-15-w2592h1936.rgb";
+		//imageName = "2014_02_18-13_32-21-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-21-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-22-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-23-w2592h1936.rgb";
+		imageName = "2014_02_20-16_38-24-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-25-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-26-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-27-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-28-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-29-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-30-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-31-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-32-w2592h1936.rgb";
+	}
+	else
+	{
+		cout << "EdgeDetection: using given imagename argument '" << argv[1] << "'" << endl;
+		imageName = argv[0];
+	}
 
 	// hämta test fil som image
 	//image *Input = readNextImageFile("Input\\");
-	//image *Input = readImageFile("Input\\2014_02_11-17_45-15-w2592h1936.rgb");
-	//image *Input = readImageFile("Input\\2014_02_18-13_32-21-w2592h1936.rgb");
-	image *Input = readImageFile("Input\\2014_02_20-16_38-21-w2592h1936.rgb");
-	//image *Input = readImageFile("Input\\2014_02_20-16_38-22-w2592h1936.rgb");
-	//image *Input = readImageFile("Input\\2014_02_20-16_38-23-w2592h1936.rgb");
-	//image *Input = readImageFile("Input\\2014_02_20-16_38-24-w2592h1936.rgb");
-	//image *Input = readImageFile("Input\\2014_02_20-16_38-25-w2592h1936.rgb");
-	//image *Input = readImageFile("Input\\2014_02_20-16_38-26-w2592h1936.rgb");
-	//image *Input = readImageFile("Input\\2014_02_20-16_38-27-w2592h1936.rgb");
-	//image *Input = readImageFile("Input\\2014_02_20-16_38-28-w2592h1936.rgb");
-	//image *Input = readImageFile("Input\\2014_02_20-16_38-29-w2592h1936.rgb");
-	//image *Input = readImageFile("Input\\2014_02_20-16_38-30-w2592h1936.rgb");
-	//image *Input = readImageFile("Input\\2014_02_20-16_38-31-w2592h1936.rgb");
-	//image *Input = readImageFile("Input\\2014_02_20-16_38-32-w2592h1936.rgb");
+	image *Input = readImageFile("Input\\" + imageName);
+	writeImagePPM("Output\\" + imageName, Input, fileType::PPM);
 
 	// Olika edgedetection tester
 	int posWeight = 5;

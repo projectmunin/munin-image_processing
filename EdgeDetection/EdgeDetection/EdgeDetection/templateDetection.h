@@ -27,7 +27,7 @@ public:
 
 
 image* templateDetect(image *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
-
-
+image* templateContrastImage(image* imageData, char posWeight, char negWeight);
+image* templateEdgeImage(image *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
 
 #endif

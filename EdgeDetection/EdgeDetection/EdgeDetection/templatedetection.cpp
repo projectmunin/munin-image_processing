@@ -50,7 +50,8 @@ weightTemplate::~weightTemplate()
 	delete weights;
 }
 
-image *templateDetect(image *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+
+weightTemplate** createTemplates(char posWeight, char negWeight)
 {
 
 	char weights0[] = {posWeight,	posWeight,	negWeight,
@@ -94,13 +95,128 @@ image *templateDetect(image *imageData, char posWeight, char negWeight, unsigned
 	weightTemplate *templateWest		= new weightTemplate(weights7);
 
 
-	weightTemplate *allTemplates[] = {templateNorthWest, templateNorth, templateNorthEast,
-									templateEast,						templateSouthEast,
-									templateSouth, templateSouthWest, templateWest};
+	weightTemplate **allTemplates = new weightTemplate*[8];
+	allTemplates[0] = templateNorthWest;
+	allTemplates[1] = templateNorth;
+	allTemplates[2] = templateNorthEast;
+	allTemplates[3] = templateEast;
+	allTemplates[4] = templateSouthEast;
+	allTemplates[5] = templateSouth;
+	allTemplates[6] = templateSouthWest;
+	allTemplates[7] = templateWest;
+
+	return allTemplates;
+
+}
+
+
+image* templateContrastImage(image* imageData, char posWeight, char negWeight)
+{
+
+	weightTemplate **allTemplates = createTemplates(posWeight, negWeight);
+
+	int width = imageData->width;
+	int height = imageData->height;
+	rgb8 **colorData = imageData->pixel;
+
+
+	/// The unscaled (not unsigned char) grayscale data
+	int **unscaledContrastPixels = new int*[width];
+	for(int x=0; x < width; x++)
+	{
+		unscaledContrastPixels[x] = new int[height];
+		for(int y=0; y < height; y++)
+		{
+			unscaledContrastPixels[x][y] = NULL;
+		}
+	}
+
+	/// The contrast image.
+	unsigned char **contrastPixels = new unsigned char*[width];
+	for(int x=0; x < width; x++)
+	{
+		contrastPixels[x] = new unsigned char[height];
+		for(int y=0; y < height; y++)
+		{
+			contrastPixels[x][y] = 0;
+		}
+	}
 
 
 
-	grayscaleFilter(imageData);
+	int lowestContrast = NULL;
+	int highestContrast = NULL;
+	for (int k=0; k<8; k++)
+	{
+		char ** weights = allTemplates[k]->weights;
+
+		for (int x = 0; x < width; x++)
+		{
+			for (int y = 0; y < height; y++)
+			{
+				if (x != 0 && x != width-1 && y != 0 && y != height-1)
+				{
+					int sum = 0;
+					for (int i = 0; i < 9; i++)
+					{
+						sum += weights[i%3][i/3] * colorData[(x-1+i%3)][(y-1+i/3)].red;
+					}
+					lowestContrast = (sum <= lowestContrast || lowestContrast == NULL) ? sum : lowestContrast;
+					highestContrast = (sum >= highestContrast || highestContrast == NULL) ? sum : highestContrast;
+
+					if (sum > unscaledContrastPixels[x][y] || unscaledContrastPixels[x][y] == NULL)
+					{
+						unscaledContrastPixels[x][y] = sum;
+					}
+				}
+				else
+				{
+					unscaledContrastPixels[x][y] = NULL;
+				}
+			}
+		}
+
+	}
+
+	int edgeDifference = highestContrast - lowestContrast;
+	for (int x = 0; x < width; x++)
+	{
+		for (int y = 0; y < height; y++)
+		{
+			if (unscaledContrastPixels[x][y] == NULL)
+			{
+				contrastPixels[x][y] = 0;
+			}
+			else
+			{
+				contrastPixels[x][y] = 255 * (unscaledContrastPixels[x][y] + lowestContrast) / edgeDifference;
+			}
+		}
+	}
+
+	image *returnImage = new image(imageData->date, width, height, contrastPixels);
+
+	/// Garbage Collection
+	// (change to use a single loop)
+	for(int i = 0; i < width; i++)
+	{
+		delete unscaledContrastPixels[i];
+		delete contrastPixels[i];
+	}
+	delete unscaledContrastPixels;
+	delete contrastPixels;
+
+
+	/// return the contrastimage
+	return returnImage;
+
+}
+
+
+image* templateEdgeImage(image *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+{
+
+	weightTemplate **allTemplates = createTemplates(posWeight, negWeight);
 
 	int width = imageData->width;
 	int height = imageData->height;
@@ -168,7 +284,7 @@ image *templateDetect(image *imageData, char posWeight, char negWeight, unsigned
 	int highestEdge = NULL;
 	for (int k=0; k<8; k++)
 	{
-		char ** weights = allTemplates[k]->weights;
+		char **weights = allTemplates[k]->weights;
 
 		for (int x = 0; x < width; x++)
 		{
@@ -231,7 +347,7 @@ image *templateDetect(image *imageData, char posWeight, char negWeight, unsigned
 		int pos = openEdges.front();
 		int x = (pos % width);
 		int y = (pos / width);
-		//cout << "loop" << endl;
+
 		/// lock the edge as checked
 		lockedEdges[x][y] = true;
 		openEdges.pop();
@@ -261,12 +377,11 @@ image *templateDetect(image *imageData, char posWeight, char negWeight, unsigned
 			}
 		}
 	}
-	
-	
+
+
 	image *returnImage = new image(imageData->date, width, height, edgePixels);
 
 	/// Garbage Collection
-	// (change to use a single loop)
 	for(int i = 0; i < width; i++)
 	{
 		delete edgePixels[i];
@@ -281,8 +396,33 @@ image *templateDetect(image *imageData, char posWeight, char negWeight, unsigned
 	delete lockedEdges;
 	delete lowEdges;
 
-	
+
+	for (int k=0; k<8; k++)
+	{
+		delete allTemplates[k];
+	}
+
+
 	/// return the edgeimage
 	return returnImage;
+
+}
+
+
+
+
+
+image* templateDetect(image *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+{
+	
+	grayscaleFilter(imageData);
+	
+	// easy to change which kind of image it should output 
+	//image *contrastImage = templateContrastImage(imageData, posWeight, negWeight);
+
+	image *edgeImage = templateEdgeImage(imageData, posWeight, negWeight, highThreshold, lowThreshold);
+
+
+	return edgeImage;
 
 }
