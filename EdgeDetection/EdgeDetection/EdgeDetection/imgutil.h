@@ -1,24 +1,56 @@
 #ifndef IMGUTIL_H
 #define IMGUTIL_H
 #include <string>
+#include <iostream>
 
+using namespace std;
 
 struct rgb8 
 {
 	unsigned char red, green, blue;
 };
 
+struct hsv
+{
+	double hue, saturation, value;
+};
+
 class image
 {
-	public:
+public:
 	string date;
 	int width;
 	int height;
 	rgb8 **pixel;
 
 	image(string date, int width, int height, rgb8 **pixel);
+	image(string date, int width, int height, unsigned char **grayPixel);
 	~image();
 
+};
+
+class hsvImage
+{
+public:
+	string date;
+	int width;
+	int height;
+	hsv **pixel;
+
+	hsvImage(image *img);
+	hsvImage(string date, int width, int height, hsv **pixel);
+	~hsvImage();
+};
+
+class grayImage
+{
+	public:
+	int width;
+	int height;
+	unsigned char **pixel;
+
+	grayImage(int width, int height, unsigned char **pixel);
+	~grayImage();
 };
 
 enum fileType
@@ -26,7 +58,22 @@ enum fileType
 	RGB,PPM 
 };
 
+enum colorChannel
+{
+	RED,GREEN,BLUE
+};
 
+enum hsvChannel
+{
+	HUE,SATURATION,VALUE
+};
+
+
+rgb8 **grayToColor(unsigned char** grayData, int width, int height);
+rgb8 **hsvChannelToRgb(hsvImage *img, hsvChannel channel);
+hsv rgbToHsv(rgb8 data);
+
+void colorChannelFilter(image *img, colorChannel channel);
 void grayscaleFilter(image *img);
 void invertFilter(image *img);
 

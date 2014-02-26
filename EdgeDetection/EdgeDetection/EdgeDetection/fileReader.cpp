@@ -14,12 +14,6 @@ image *readImageFile(string path)
 	int width = atoi(reverseString(pathRev.substr(9,4)).c_str());  //Template YYYY_MM_DD'HH_MM'SS_UU'wWWWWhHHHH.rgb where WWWW is width and HHHH is height.
 	int height = atoi(reverseString(pathRev.substr(4,4)).c_str());
 	
-	rgb8 **p = new rgb8*[width];
-	for(int k=0;k<width;k++)
-	{
-		p[k] = new rgb8[height];
-	}
-
 	ifstream myFile;
 	myFile.open(path, ios::in | ios::binary | ios::ate);
 
@@ -29,6 +23,10 @@ image *readImageFile(string path)
 	if(myFile.is_open())
 	{
 		size = myFile.tellg();
+		if((int)size!=(width*height*3))
+		{
+			return NULL;
+		}
 		memblock = new char[size];
 		myFile.seekg(0,ios::beg);
 		myFile.read(memblock,size);
@@ -47,9 +45,10 @@ image *readImageFile(string path)
 			}
 		}
 		delete[] memblock;
-	}
-	return new image(date,width,height,p);
 
+		return new image(date,width,height,p);
+	}
+	return NULL;
 }
 
 
@@ -111,7 +110,7 @@ void writeImagePPM(string path, image *img, fileType type)
 	}
 
 	//Template YYYY_MM_DD'HH_MM'SS_UU'wWWWW'hHHHH.ppm where WWWW is width and HHHH is height.
-	string fileName = img->date + "-w" + to_string(img->width) + "h" + to_string(img->height) + fileEnding;
+	string fileName = img->date + "_w" + to_string(img->width) + "h" + to_string(img->height) + fileEnding;
 
 	ofstream file;
 	file.open(path+fileName, ios::binary);
@@ -146,7 +145,7 @@ void writeImagePPM(string path, image *img, fileType type)
 	delete[] memblock;
 }
 
-
+/*
 int main()
 {
 	image *img;
@@ -164,3 +163,4 @@ int main()
 	//system("pause");
 	return 0;
 }
+*/

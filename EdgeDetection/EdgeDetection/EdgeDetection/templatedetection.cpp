@@ -13,12 +13,13 @@
 
 
 
+#include <math.h>
 #include <iostream>
 #include <string>
 #include <stdio.h>
 
-#include "imgutil.cpp"
-
+#include "imgutil.h"
+/*
 
 class weightTemplate
 {
@@ -55,12 +56,13 @@ class weightTemplate
 		}
 		delete weights;
 	}
-
 };
 
 
-grayImage templateDetect(image *imageData, char posWeight, char negWeight)
+image templateDetect(image *imageData, char posWeight, char negWeight, char highThreshold, char lowThreshold)
 {
+
+	float scale = fmax((float)abs(posWeight), (float)abs(negWeight)) * 8;
 
 	char weights1[] = {posWeight,	posWeight,	posWeight,
 						negWeight,	0,			negWeight,
@@ -121,6 +123,14 @@ grayImage templateDetect(image *imageData, char posWeight, char negWeight)
 	}
 
 
+	//int *lockedEdges;
+	//int lockedEdgesLength = 0;
+	//int *openEdges;
+	//int openEdgesLength = 0;
+	//int *lowEdges;
+	//int lowEdgesLength = 0;
+
+
 	for (int k=0; k<9; k++)
 	{
 		weightTemplate weights = allTemplates[k];
@@ -136,10 +146,16 @@ grayImage templateDetect(image *imageData, char posWeight, char negWeight)
 					{
 						sum += weights[i] * colorData[(x-1+i%3)][(y-1+i/3)].red;
 					}
+					sum = sum/scale;
 
 					if (sum > edgePixels[x][y])
 					{
 						edgePixels[x][y] = sum;
+						
+						//if (sum > highTreshold)
+						//{
+						//	openEdges[] = 
+						//}
 					}
 				}
 				else
@@ -152,6 +168,13 @@ grayImage templateDetect(image *imageData, char posWeight, char negWeight)
 	}
 
 
-	return grayImage(width, height, edgePixels);
+	/// is over high threshold -> edge
+	/// is over low -> low
+	/// find x, remove x from edge, find x's edge neighbour ! in locked_edge or edge & finns i low -> edge
+	/// x -> locked_edge
+
+
+	return image(imageData->date, width, height, edgePixels);
 
 }
+*/

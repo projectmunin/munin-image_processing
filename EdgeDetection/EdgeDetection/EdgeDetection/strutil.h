@@ -3,5 +3,5 @@
 #include <string>
 
 
-string reverseString(string input);
+std::string reverseString(std::string input);
 #endif
