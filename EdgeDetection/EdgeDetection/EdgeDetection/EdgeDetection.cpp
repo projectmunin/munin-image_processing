@@ -45,8 +45,8 @@ int main( int argc, char* argv[] )
 
 		cout << "EdgeDetection: no arguments, using hardcoded 'input'" << endl;
 
-		imageName = "2014_02_11-17_45-15-w2592h1936.rgb";
-		//imageName = "2014_02_18-13_32-21-w2592h1936.rgb";
+		//imageName = "2014_02_11-17_45-15-w2592h1936.rgb";
+		imageName = "2014_02_18-13_32-21-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-21-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-22-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-23-w2592h1936.rgb";
@@ -77,8 +77,8 @@ int main( int argc, char* argv[] )
 	// Olika edgedetection tester
 	int posWeight = 5;
 	int negWeight = -3;
-	unsigned char highThreshold = 160;
-	unsigned char lowThreshold = 140;
+	unsigned char highThreshold = 150;
+	unsigned char lowThreshold = 135;
 
 	image *templateDetectionEdges;
 	if (mode == "rgbchannels")
