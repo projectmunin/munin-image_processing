@@ -9,6 +9,11 @@ struct rgb8
 	unsigned char red, green, blue;
 };
 
+struct hsv
+{
+	double hue, saturation, value;
+};
+
 class image
 {
 public:
@@ -23,6 +28,19 @@ public:
 
 	~image();
 
+};
+
+class hsvImage
+{
+public:
+	string date;
+	int width;
+	int height;
+	hsv **pixel;
+
+	hsvImage(image *img);
+	hsvImage(string date, int width, int height, hsv **pixel);
+	~hsvImage();
 };
 
 class grayImage
@@ -43,9 +61,23 @@ enum fileType
 	RGB,PPM 
 };
 
+enum colorChannel
+{
+	RED,GREEN,BLUE
+};
+
+enum hsvChannel
+{
+	HUE,SATURATION,VALUE
+};
+
 
 rgb8** grayToColor(unsigned char** grayData, int width, int height);
+rgb8 **hsvChannelToRgb(hsvImage *img, hsvChannel channel);
+hsv rgbToHsv(rgb8 data);
+unsigned char **hsvChannelToGrayscale(hsvImage *img, hsvChannel channel);
+
+void colorChannelFilter(image *img, colorChannel channel);
 void grayscaleFilter(image *img);
 void invertFilter(image *img);
-
 #endif

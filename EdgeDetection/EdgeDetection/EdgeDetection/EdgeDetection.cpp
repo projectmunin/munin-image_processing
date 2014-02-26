@@ -60,8 +60,14 @@ int main( int argc, char* argv[] )
 		//imageName = "2014_02_20-16_38-31-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-32-w2592h1936.rgb";
 
+<<<<<<< HEAD
 		mode = "rgbchannels";
 		//mode = "grayscale";
+=======
+		//mode = "hsvchannels";
+		//mode = "rgbchannels";
+		mode = "grayscale";
+>>>>>>> 405bac495e4b3c1b635ff15bf322d25fe61e284d
 	}
 	else
 	{
@@ -74,9 +80,12 @@ int main( int argc, char* argv[] )
 	image *Input = readImageFile("Input\\" + imageName);
 	writeImagePPM("Output\\" + imageName, Input, fileType::PPM);
 
+	colorChannelFilter(Input, GREEN);
+
 	// Olika edgedetection tester
 	int posWeight = 5;
 	int negWeight = -3;
+<<<<<<< HEAD
 	unsigned char highThreshold = 150;
 	unsigned char lowThreshold = 135;
 
@@ -85,11 +94,30 @@ int main( int argc, char* argv[] )
 	{
 		templateDetectionEdges = templateDetectRGBChannels(Input, posWeight, negWeight,
 			highThreshold, lowThreshold);
+=======
+	unsigned char highThreshold = 220;
+	unsigned char lowThreshold = 157;
+
+	image *templateDetectionEdges;
+	if (mode == "hsvchannels")
+	{
+		templateDetectionEdges = templateDetectHSVChannels(Input, posWeight, negWeight,
+				highThreshold, lowThreshold);
+	}
+	else if (mode == "rgbchannels")
+	{
+		templateDetectionEdges = templateDetectRGBChannels(Input, posWeight, negWeight,
+				highThreshold, lowThreshold);
+>>>>>>> 405bac495e4b3c1b635ff15bf322d25fe61e284d
 	}
 	else if (mode == "grayscale")
 	{
 		templateDetectionEdges = templateDetectGrayscale(Input, posWeight, negWeight,
+<<<<<<< HEAD
 		highThreshold, lowThreshold);
+=======
+				highThreshold, lowThreshold);
+>>>>>>> 405bac495e4b3c1b635ff15bf322d25fe61e284d
 	}
 
 	// Spara edge filerna i ett sorterat sätt så man vet vilken som är vilken
