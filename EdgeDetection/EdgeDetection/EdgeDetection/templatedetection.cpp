@@ -478,7 +478,7 @@ image* templateDetectRGBChannels(image *colorImage, char posWeight, char negWeig
 
 	image *edgeImage = new image(colorImage->date, width, height, edgePixels);
 
-	cout << "created an edgeimage merged from the 3 grayscale edgeimages" << endl;
+	cout << "created an edgeimage merged from the grayscale edgeimages" << endl;
 
 	/// Garbage Collection
 	for(int i = 0; i < width; i++)

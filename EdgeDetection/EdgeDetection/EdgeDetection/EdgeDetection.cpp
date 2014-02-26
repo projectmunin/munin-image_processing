@@ -46,8 +46,8 @@ int main( int argc, char* argv[] )
 		cout << "EdgeDetection: no arguments, using hardcoded 'input'" << endl;
 
 		//imageName = "2014_02_11-17_45-15-w2592h1936.rgb";
-		imageName = "2014_02_18-13_32-21-w2592h1936.rgb";
-		//imageName = "2014_02_20-16_38-21-w2592h1936.rgb";
+		//imageName = "2014_02_18-13_32-21-w2592h1936.rgb";
+		imageName = "2014_02_20-16_38-21-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-22-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-23-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-24-w2592h1936.rgb";
@@ -60,8 +60,8 @@ int main( int argc, char* argv[] )
 		//imageName = "2014_02_20-16_38-31-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-32-w2592h1936.rgb";
 
-		//mode = "rgbchannels";
-		mode = "grayscale";
+		mode = "rgbchannels";
+		//mode = "grayscale";
 	}
 	else
 	{
