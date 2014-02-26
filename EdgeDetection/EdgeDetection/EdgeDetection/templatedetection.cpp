@@ -110,38 +110,29 @@ weightTemplate** createTemplates(char posWeight, char negWeight)
 }
 
 
-image* templateContrastImage(image* imageData, char posWeight, char negWeight)
+grayImage* templateContrastImage(grayImage* imageData, char posWeight, char negWeight)
 {
 
 	weightTemplate **allTemplates = createTemplates(posWeight, negWeight);
 
 	int width = imageData->width;
 	int height = imageData->height;
-	rgb8 **colorData = imageData->pixel;
+	unsigned char **pixelData = imageData->pixel;
 
 
 	/// The unscaled (not unsigned char) grayscale data
 	int **unscaledContrastPixels = new int*[width];
-	for(int x=0; x < width; x++)
-	{
-		unscaledContrastPixels[x] = new int[height];
-		for(int y=0; y < height; y++)
-		{
-			unscaledContrastPixels[x][y] = NULL;
-		}
-	}
-
-	/// The contrast image.
 	unsigned char **contrastPixels = new unsigned char*[width];
 	for(int x=0; x < width; x++)
 	{
+		unscaledContrastPixels[x] = new int[height];
 		contrastPixels[x] = new unsigned char[height];
 		for(int y=0; y < height; y++)
 		{
+			unscaledContrastPixels[x][y] = NULL;
 			contrastPixels[x][y] = 0;
 		}
 	}
-
 
 
 	int lowestContrast = NULL;
@@ -159,7 +150,7 @@ image* templateContrastImage(image* imageData, char posWeight, char negWeight)
 					int sum = 0;
 					for (int i = 0; i < 9; i++)
 					{
-						sum += weights[i%3][i/3] * colorData[(x-1+i%3)][(y-1+i/3)].red;
+						sum += weights[i%3][i/3] * pixelData[(x-1+i%3)][(y-1+i/3)];
 					}
 					lowestContrast = (sum <= lowestContrast || lowestContrast == NULL) ? sum : lowestContrast;
 					highestContrast = (sum >= highestContrast || highestContrast == NULL) ? sum : highestContrast;
@@ -194,7 +185,7 @@ image* templateContrastImage(image* imageData, char posWeight, char negWeight)
 		}
 	}
 
-	image *returnImage = new image(imageData->date, width, height, contrastPixels);
+	grayImage *returnImage = new grayImage(width, height, contrastPixels);
 
 	/// Garbage Collection
 	// (change to use a single loop)
@@ -213,71 +204,39 @@ image* templateContrastImage(image* imageData, char posWeight, char negWeight)
 }
 
 
-image* templateEdgeImage(image *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+grayImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
 {
 
 	weightTemplate **allTemplates = createTemplates(posWeight, negWeight);
 
+	cout << "created templates" << endl;
+
 	int width = imageData->width;
 	int height = imageData->height;
-	rgb8 **colorData = imageData->pixel;
-
-
-	/// The unscaled (not unsigned char) grayscale data
-	int **unscaledContrastPixels = new int*[width];
-	for(int x=0; x < width; x++)
-	{
-		unscaledContrastPixels[x] = new int[height];
-		for(int y=0; y < height; y++)
-		{
-			unscaledContrastPixels[x][y] = NULL;
-		}
-	}
+	unsigned char **pixelData = imageData->pixel;
 
 	/// The contrast image.
-	unsigned char **contrastPixels = new unsigned char*[width];
-	for(int x=0; x < width; x++)
-	{
-		contrastPixels[x] = new unsigned char[height];
-		for(int y=0; y < height; y++)
-		{
-			contrastPixels[x][y] = 0;
-		}
-	}
-
-	/// The binary edge image
+	int **contrastPixels = new int*[width];
 	unsigned char **edgePixels = new unsigned char*[width];
-	for(int x=0; x < width; x++)
-	{
-		edgePixels[x] = new unsigned char[height];
-		for(int y=0; y < height; y++)
-		{
-			edgePixels[x][y] = 0;
-		}
-	}
-
-
 	bool **lockedEdges = new bool*[width];
-	for(int x=0; x < width; x++)
-	{
-		lockedEdges[x] = new bool[height];
-		for(int y=0; y < height; y++)
-		{
-			lockedEdges[x][y] = false;
-		}
-	}
-
 	bool **lowEdges = new bool*[width];
 	for(int x=0; x < width; x++)
 	{
+		contrastPixels[x] = new int[height];
+		edgePixels[x] = new unsigned char[height];
+		lockedEdges[x] = new bool[height];
 		lowEdges[x] = new bool[height];
 		for(int y=0; y < height; y++)
 		{
+			contrastPixels[x][y] = NULL;
+			lockedEdges[x][y] = false;
 			lowEdges[x][y] = false;
 		}
 	}
 
 	queue<int> openEdges;
+
+	printf( "initialized arrays of size %i * %i = %i\n", width, height, width*height );
 
 
 	int lowestEdge = NULL;
@@ -295,40 +254,43 @@ image* templateEdgeImage(image *imageData, char posWeight, char negWeight, unsig
 					int sum = 0;
 					for (int i = 0; i < 9; i++)
 					{
-						sum += weights[i%3][i/3] * colorData[(x-1+i%3)][(y-1+i/3)].red;
+						sum += weights[i%3][i/3] * pixelData[(x-1+i%3)][(y-1+i/3)];
 					}
 					lowestEdge = (sum <= lowestEdge || lowestEdge == NULL) ? sum : lowestEdge;
 					highestEdge = (sum >= highestEdge || highestEdge == NULL) ? sum : highestEdge;
 
-					if (sum > unscaledContrastPixels[x][y] || unscaledContrastPixels[x][y] == NULL)
+					if (sum > contrastPixels[x][y] || contrastPixels[x][y] == NULL)
 					{
-						unscaledContrastPixels[x][y] = sum;
+						contrastPixels[x][y] = sum;
 					}
 				}
 				else
 				{
-					unscaledContrastPixels[x][y] = NULL;
+					contrastPixels[x][y] = NULL;
 				}
 			}
 		}
 
 	}
 
+	cout << "mapped contrasts" << endl;
+
 	int edgeDifference = highestEdge - lowestEdge;
 	for (int x = 0; x < width; x++)
 	{
 		for (int y = 0; y < height; y++)
 		{
-			if (unscaledContrastPixels[x][y] == NULL)
+			unsigned char pixel;
+			if (contrastPixels[x][y] == NULL)
 			{
-				contrastPixels[x][y] = 0;
+				pixel = 0;
 			}
 			else
 			{
-				contrastPixels[x][y] = 255 * (unscaledContrastPixels[x][y] + lowestEdge) / edgeDifference;
+				pixel = 255 * (contrastPixels[x][y] + lowestEdge) / edgeDifference;
 			}
 
-			unsigned char pixel = contrastPixels[x][y];
+			edgePixels[x][y] = 0;
 			if (pixel > highThreshold)
 			{
 				openEdges.push(x + y*width);
@@ -340,6 +302,7 @@ image* templateEdgeImage(image *imageData, char posWeight, char negWeight, unsig
 		}
 	}
 
+	cout << "identified edges and low edges" << endl;
 
 	/// check edges
 	while (!openEdges.empty())
@@ -378,20 +341,19 @@ image* templateEdgeImage(image *imageData, char posWeight, char negWeight, unsig
 		}
 	}
 
+	cout << "mapped confirmed edges" << endl;
 
-	image *returnImage = new image(imageData->date, width, height, edgePixels);
+	grayImage *returnImage = new grayImage(width, height, edgePixels);
+
+	cout << "created edgeimage" << endl;
 
 	/// Garbage Collection
 	for(int i = 0; i < width; i++)
 	{
-		delete edgePixels[i];
-		delete unscaledContrastPixels[i];
 		delete contrastPixels[i];
 		delete lockedEdges[i];
 		delete lowEdges[i];
 	}
-	delete edgePixels;
-	delete unscaledContrastPixels;
 	delete contrastPixels;
 	delete lockedEdges;
 	delete lowEdges;
@@ -402,6 +364,7 @@ image* templateEdgeImage(image *imageData, char posWeight, char negWeight, unsig
 		delete allTemplates[k];
 	}
 
+	cout << "collected garbage" << endl;
 
 	/// return the edgeimage
 	return returnImage;
@@ -409,19 +372,160 @@ image* templateEdgeImage(image *imageData, char posWeight, char negWeight, unsig
 }
 
 
-
-
-
-image* templateDetect(image *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+image* templateDetectGrayscale(image *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
 {
 	
-	grayscaleFilter(imageData);
-	
+	int width = colorImage->width;
+	int height = colorImage->height;
+
+	grayImage *imageData = new grayImage(colorImage);
+
 	// easy to change which kind of image it should output 
 	//image *contrastImage = templateContrastImage(imageData, posWeight, negWeight);
 
-	image *edgeImage = templateEdgeImage(imageData, posWeight, negWeight, highThreshold, lowThreshold);
+	grayImage *grayscaleEdgeImage = templateEdgeImage(imageData, posWeight, negWeight, highThreshold, lowThreshold);
 
+	rgb8 **edgePixels = new rgb8*[width];
+	for(int x=0; x < width; x++)
+	{
+		edgePixels[x] = new rgb8[height];
+		for(int y=0; y < height; y++)
+		{
+			edgePixels[x][y].red = grayscaleEdgeImage->pixel[x][y];
+			edgePixels[x][y].green = grayscaleEdgeImage->pixel[x][y];
+			edgePixels[x][y].blue = grayscaleEdgeImage->pixel[x][y];
+		}
+	}
+
+	image *edgeImage = new image(colorImage->date, width, height, edgePixels);
+
+	return edgeImage;
+
+}
+
+
+image* templateDetectRGBChannels(image *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+{
+	
+	int width = colorImage->width;
+	int height = colorImage->height;
+
+	unsigned char **redChannel = new unsigned char*[width];
+	unsigned char **greenChannel = new unsigned char*[width];
+	unsigned char **blueChannel = new unsigned char*[width];
+	for(int x=0; x < width; x++)
+	{
+		redChannel[x] = new unsigned char[height];
+		greenChannel[x] = new unsigned char[height];
+		blueChannel[x] = new unsigned char[height];
+		for(int y=0; y < height; y++)
+		{
+			redChannel[x][y] = colorImage->pixel[x][y].red;
+			greenChannel[x][y] = colorImage->pixel[x][y].green;
+			blueChannel[x][y] = colorImage->pixel[x][y].blue;
+		}
+	}
+
+	printf("created r, g & b channels of size %i * %i = %i\n", width, height, width*height);
+
+	grayImage *imageData = new grayImage(colorImage);
+	grayImage *imageDataRed = new grayImage(width, height, redChannel);
+	grayImage *imageDataGreen = new grayImage(width, height, greenChannel);
+	grayImage *imageDataBlue = new grayImage(width, height, blueChannel);
+
+	cout << "Created grayscale images using rgb channels from original image" << endl;
+
+	// easy to change which kind of image it should output 
+	//image *contrastImage = templateContrastImage(imageData, posWeight, negWeight);
+
+	grayImage *grayscaleEdgeImage = templateEdgeImage(imageData, posWeight, negWeight, highThreshold, lowThreshold);
+	grayImage *redEdgeImage = templateEdgeImage(imageDataRed, posWeight, negWeight, highThreshold, lowThreshold);
+	cout << "created edgeimages for 1 grayscale image" << endl;
+	grayImage *greenEdgeImage = templateEdgeImage(imageDataGreen, posWeight, negWeight, highThreshold, lowThreshold);
+	cout << "created edgeimages for 2 grayscale image" << endl;
+	grayImage *blueEdgeImage = templateEdgeImage(imageDataBlue, posWeight, negWeight, highThreshold, lowThreshold);
+
+	cout << "created edgeimages for each grayscale image" << endl;
+
+	rgb8 **edgePixels = new rgb8*[width];
+	for(int x=0; x < width; x++)
+	{
+		edgePixels[x] = new rgb8[height];
+		for(int y=0; y < height; y++)
+		{
+			unsigned char pixel = ( ((int) redEdgeImage->pixel[x][y]) + ((int) greenEdgeImage->pixel[x][y])
+					+ ((int) blueEdgeImage->pixel[x][y]) + ((int) grayscaleEdgeImage->pixel[x][y]) ) > 0 ? 255 : 0;
+
+			edgePixels[x][y].red = pixel;
+			edgePixels[x][y].green = pixel;
+			edgePixels[x][y].blue = pixel;
+		}
+	}
+
+	image *edgeImage = new image(colorImage->date, width, height, edgePixels);
+
+	cout << "created an edgeimage merged from the grayscale edgeimages" << endl;
+
+	/// Garbage Collection
+	for(int i = 0; i < width; i++)
+	{
+		delete redChannel[i];
+		delete greenChannel[i];
+		delete blueChannel[i];
+	}
+	delete redChannel;
+	delete greenChannel;
+	delete blueChannel;
+
+	cout << "collected garbage" << endl;
+
+	return edgeImage;
+
+}
+
+
+image* templateDetectHSVChannels(image *rgbImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+{
+
+	int width = rgbImage->width;
+	int height = rgbImage->height;
+
+	hsvImage *hsvImg = new hsvImage(rgbImage);
+
+	grayImage *imageDataGrayscale = new grayImage(rgbImage);
+	grayImage *imageDataHSV = new grayImage(width, height, hsvChannelToGrayscale(hsvImg, HUE));
+
+	cout << "Created grayscale images using rgb channels from original image" << endl;
+
+	// easy to change which kind of image it should output 
+	//image *contrastImage = templateContrastImage(imageData, posWeight, negWeight);
+
+	grayImage *grayscaleEdgeImage = templateEdgeImage(imageDataGrayscale, posWeight, negWeight,
+			highThreshold, lowThreshold);
+	cout << "created edgeimages for 1 grayscale image" << endl;
+	grayImage *hueEdgeImage = templateEdgeImage(imageDataHSV, posWeight, negWeight,
+			highThreshold, lowThreshold);
+
+	cout << "created edgeimages for each grayscale image" << endl;
+
+	rgb8 **edgePixels = new rgb8*[width];
+	for(int x=0; x < width; x++)
+	{
+		edgePixels[x] = new rgb8[height];
+		for(int y=0; y < height; y++)
+		{
+			unsigned char pixel = ( hueEdgeImage->pixel[x][y]
+					+ grayscaleEdgeImage->pixel[x][y] ) > 0 ? 255 : 0;
+
+			edgePixels[x][y].red = pixel;
+			edgePixels[x][y].green = pixel;
+			edgePixels[x][y].blue = pixel;
+		}
+	}
+
+	image *edgeImage = new image(rgbImage->date, width, height, edgePixels);
+
+	cout << "created an edgeimage merged from the grayscale edgeimages" << endl;
 
 	return edgeImage;
 
