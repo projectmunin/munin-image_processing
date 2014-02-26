@@ -384,13 +384,11 @@ grayImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeigh
 	/// Garbage Collection
 	for(int i = 0; i < width; i++)
 	{
-		delete edgePixels[i];
 		delete unscaledContrastPixels[i];
 		delete contrastPixels[i];
 		delete lockedEdges[i];
 		delete lowEdges[i];
 	}
-	delete edgePixels;
 	delete unscaledContrastPixels;
 	delete contrastPixels;
 	delete lockedEdges;
@@ -430,9 +428,6 @@ image* templateDetectGrayscale(image *colorImage, char posWeight, char negWeight
 		edgePixels[x] = new rgb8[height];
 		for(int y=0; y < height; y++)
 		{
-			edgePixels[x][y].red = 0;
-			edgePixels[x][y].green = 0;
-			edgePixels[x][y].blue = 0;
 			edgePixels[x][y].red = grayscaleEdgeImage->pixel[x][y];
 			edgePixels[x][y].green = grayscaleEdgeImage->pixel[x][y];
 			edgePixels[x][y].blue = grayscaleEdgeImage->pixel[x][y];
@@ -440,15 +435,6 @@ image* templateDetectGrayscale(image *colorImage, char posWeight, char negWeight
 	}
 
 	image *edgeImage = new image(colorImage->date, width, height, edgePixels);
-
-
-	/// Garbage Collection
-	for(int i = 0; i < width; i++)
-	{
-		delete edgePixels[i];
-	}
-	delete edgePixels;
-
 
 	return edgeImage;
 
@@ -511,8 +497,8 @@ image* templateDetectRGBChannels(image *colorImage, char posWeight, char negWeig
 		edgePixels[x] = new rgb8[height];
 		for(int y=0; y < height; y++)
 		{
-			unsigned char pixel = ( redEdgeImage->pixel[x][y] * greenEdgeImage->pixel[x][y]
-					* blueEdgeImage->pixel[x][y] ) > 0 ? 255 : 0;
+			unsigned char pixel = ( redEdgeImage->pixel[x][y] + greenEdgeImage->pixel[x][y]
+					+ blueEdgeImage->pixel[x][y] ) > 0 ? 255 : 0;
 
 			edgePixels[x][y].red = pixel;
 			edgePixels[x][y].green = pixel;
@@ -526,12 +512,10 @@ image* templateDetectRGBChannels(image *colorImage, char posWeight, char negWeig
 	/// Garbage Collection
 	for(int i = 0; i < width; i++)
 	{
-		delete edgePixels[i];
 		delete redChannel[i];
 		delete greenChannel[i];
 		delete blueChannel[i];
 	}
-	delete edgePixels;
 	delete redChannel;
 	delete greenChannel;
 	delete blueChannel;
