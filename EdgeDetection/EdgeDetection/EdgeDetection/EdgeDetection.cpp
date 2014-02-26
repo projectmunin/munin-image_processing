@@ -44,12 +44,12 @@ int main( int argc, char* argv[] )
 
 		cout << "EdgeDetection: no arguments, using hardcoded 'input'" << endl;
 
-		//imageName = "2014_02_11-17_45-15-w2592h1936.rgb";
+		imageName = "2014_02_11-17_45-15-w2592h1936.rgb";
 		//imageName = "2014_02_18-13_32-21-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-21-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-22-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-23-w2592h1936.rgb";
-		imageName = "2014_02_20-16_38-24-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-24-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-25-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-26-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-27-w2592h1936.rgb";
@@ -75,11 +75,13 @@ int main( int argc, char* argv[] )
 	int negWeight = -3;
 	unsigned char highThreshold = 150;
 	unsigned char lowThreshold = 135;
-	image *templateDetectionEdges = templateDetect(Input, posWeight, negWeight,
-			highThreshold, lowThreshold);
+	//image *templateDetectionEdges = templateDetectRGBChannels(Input, posWeight, negWeight,
+	//	highThreshold, lowThreshold);
+	image *templateDetectionEdges = templateDetectGrayscale(Input, posWeight, negWeight,
+		highThreshold, lowThreshold);
 
 	// Spara edge filerna i ett sorterat sätt så man vet vilken som är vilken
-	writeImagePPM("Output\\TemplateDetection\\weights-pos(" + to_string(posWeight)
+	writeImagePPM("Output\\TemplateDetection\\rgbchannels\\weights-pos(" + to_string(posWeight)
 					+ ")-neg(" + to_string(negWeight)
 					+ ")_threshold-high" + to_string(highThreshold)
 					+ "-low" + to_string(lowThreshold), templateDetectionEdges, fileType::PPM);
