@@ -47,11 +47,11 @@ int main( int argc, char* argv[] )
 
 		//imageName = "2014_02_11-17_45-15-w2592h1936.rgb";
 		//imageName = "2014_02_18-13_32-21-w2592h1936.rgb";
-		imageName = "2014_02_20-16_38-21-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-21-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-22-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-23-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-24-w2592h1936.rgb";
-		//imageName = "2014_02_20-16_38-25-w2592h1936.rgb";
+		imageName = "2014_02_20-16_38-25-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-26-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-27-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-28-w2592h1936.rgb";
@@ -60,14 +60,9 @@ int main( int argc, char* argv[] )
 		//imageName = "2014_02_20-16_38-31-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-32-w2592h1936.rgb";
 
-<<<<<<< HEAD
+		//mode = "hsvchannels";
 		mode = "rgbchannels";
 		//mode = "grayscale";
-=======
-		//mode = "hsvchannels";
-		//mode = "rgbchannels";
-		mode = "grayscale";
->>>>>>> 405bac495e4b3c1b635ff15bf322d25fe61e284d
 	}
 	else
 	{
@@ -85,16 +80,6 @@ int main( int argc, char* argv[] )
 	// Olika edgedetection tester
 	int posWeight = 5;
 	int negWeight = -3;
-<<<<<<< HEAD
-	unsigned char highThreshold = 150;
-	unsigned char lowThreshold = 135;
-
-	image *templateDetectionEdges;
-	if (mode == "rgbchannels")
-	{
-		templateDetectionEdges = templateDetectRGBChannels(Input, posWeight, negWeight,
-			highThreshold, lowThreshold);
-=======
 	unsigned char highThreshold = 220;
 	unsigned char lowThreshold = 157;
 
@@ -108,16 +93,11 @@ int main( int argc, char* argv[] )
 	{
 		templateDetectionEdges = templateDetectRGBChannels(Input, posWeight, negWeight,
 				highThreshold, lowThreshold);
->>>>>>> 405bac495e4b3c1b635ff15bf322d25fe61e284d
 	}
 	else if (mode == "grayscale")
 	{
 		templateDetectionEdges = templateDetectGrayscale(Input, posWeight, negWeight,
-<<<<<<< HEAD
-		highThreshold, lowThreshold);
-=======
 				highThreshold, lowThreshold);
->>>>>>> 405bac495e4b3c1b635ff15bf322d25fe61e284d
 	}
 
 	// Spara edge filerna i ett sorterat sätt så man vet vilken som är vilken
