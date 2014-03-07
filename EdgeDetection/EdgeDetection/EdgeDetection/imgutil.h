@@ -14,6 +14,11 @@ struct hsv
 	double hue, saturation, value;
 };
 
+class image;
+class grayImage;
+class hsvImage;
+
+
 class image
 {
 public:
@@ -25,6 +30,8 @@ public:
 	image(string date, int width, int height, rgb8 **pixel);
 
 	image(string date, int width, int height, unsigned char **grayPixel);
+
+	image(string date, grayImage *imageData);
 
 	~image();
 
@@ -52,7 +59,7 @@ public:
 
 	grayImage(int width, int height, unsigned char **pixel);
 	grayImage(image *colorImage);
-
+	grayImage(int width, int height);
 	~grayImage();
 };
 
@@ -80,4 +87,6 @@ unsigned char **hsvChannelToGrayscale(hsvImage *img, hsvChannel channel);
 void colorChannelFilter(image *img, colorChannel channel);
 void grayscaleFilter(image *img);
 void invertFilter(image *img);
+void embed(grayImage *img, int radius);
+void debed (grayImage *img, int radius);
 #endif

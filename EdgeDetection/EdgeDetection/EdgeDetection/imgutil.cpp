@@ -23,6 +23,15 @@ image::image(string date, int width, int height, unsigned char **grayPixel)
 	this->pixel = grayToColor(grayPixel, width, height);
 }
 
+image::image(string date, grayImage *imageData)
+{
+	this->date=date;
+	this->width=imageData->width;
+	this->height=imageData->height;
+
+	this->pixel = grayToColor(imageData->pixel, imageData->width, imageData->height);
+}
+
 image::~image()
 {
 	for(int i=0;i<width;i++)
@@ -82,6 +91,18 @@ grayImage::grayImage(int width, int height, unsigned char **pixel)
 	this->pixel=pixel;
 }
 
+grayImage::grayImage(int width, int height)
+{
+	this->width=width;
+	this->height=height;
+
+	unsigned char **pixel = new unsigned char*[width];
+	for(int x=0; x < width; x++)
+	{
+		pixel[x] = new unsigned char[height];
+	}
+	this->pixel=pixel;
+}
 
 grayImage::grayImage(image *colorImage)
 {
@@ -287,4 +308,64 @@ void invertFilter(image *img)
 			img->pixel[i][j].blue = 255-img->pixel[i][j].blue;
 		}
 	}
+}
+
+
+void embed(grayImage *img, int radius)
+{
+	
+	int x,y;
+	int width = img->width+radius*2;
+	int height = img->height+radius*2;
+
+	unsigned char **pixel = new unsigned char*[width];
+	for(int x=0; x < width; x++)
+	{
+		pixel[x] = new unsigned char[height];
+		for (y=0; y < height; y++)
+		{
+			if (x < radius || x >= img->width + radius || y < radius || y >= img->height + radius)
+			{
+				pixel[x][y] = 0;
+			}
+			else
+			{
+				pixel[x][y] = img->pixel[x - radius][y - radius];
+			}
+		}
+	}
+
+
+	delete img->pixel;
+
+	img->width = width;
+	img->height= height;
+	img->pixel = pixel;
+
+}
+
+void debed(grayImage *img, int radius)
+{
+
+	int x,y;
+	int width = img->width-radius*2;
+	int height = img->height-radius*2;
+
+	unsigned char **pixel = new unsigned char*[width];
+	for(int x=0; x < width; x++)
+	{
+		pixel[x] = new unsigned char[height];
+		for (y=0; y < height; y++)
+		{
+			pixel[x][y] = img->pixel[x + radius][y + radius];
+		}
+	}
+
+
+	delete img->pixel;
+
+	img->width = width;
+	img->height= height;
+	img->pixel = pixel;
+
 }
