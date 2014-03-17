@@ -49,8 +49,8 @@ int main( int argc, char* argv[] )
 
 		cout << "EdgeDetection: no arguments, using hardcoded 'input'" << endl;
 
-		//imageName = "2014_02_11-17_45-15-w2592h1936.rgb";
-		imageName = "2014_02_18-13_32-21-w2592h1936.rgb";
+		imageName = "2014_02_11-17_45-15-w2592h1936.rgb";
+		//imageName = "2014_02_18-13_32-21-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-21-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-22-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-23-w2592h1936.rgb";
@@ -97,8 +97,8 @@ int main( int argc, char* argv[] )
 	{
 		posWeight = 5;
 		negWeight = -3;
-		highThreshold = 220;
-		lowThreshold = 157;
+		highThreshold = 150;
+		lowThreshold = 135;
 
 		if (mode == "hsvchannels")
 		{

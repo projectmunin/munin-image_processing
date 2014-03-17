@@ -1,3 +1,6 @@
+# Ignore images too!
+*.png
+
 # Compiled Object files
 *.slo
 *.lo
