@@ -1,6 +1,8 @@
+
 #include "fileReader.h"
 
 using namespace std;
+
 
 ///[OLD]Reads the first .rgb-file in the default folder and returns a pointer to an image represented as a two dimensional array if a .rgb-file is found. 
 ///[OLD]Returns NULL if a .rgb-file is not detected.

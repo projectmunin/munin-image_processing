@@ -1,8 +1,10 @@
 #ifndef IMGUTIL_H
 #define IMGUTIL_H
+
 #include <string>
 
 using namespace std;
+
 
 struct rgb8 
 {

@@ -13,19 +13,7 @@
 
 
 
-#include <iostream>
-#include <string>
-#include <stdio.h>
-
-#include "imgutil.h"
-
-#include "filereader.h"
-
-#include "templateDetection.h"
-// #include "isefPasta.h" // stuff cant be used since it was from the book. Licenses!!! was bad anyway.
-
-
-using namespace std;
+#include "EdgeDetection.h"
 
 
 int main( int argc, char* argv[] )
@@ -49,9 +37,9 @@ int main( int argc, char* argv[] )
 
 		cout << "EdgeDetection: no arguments, using hardcoded 'input'" << endl;
 
-		imageName = "2014_02_11-17_45-15-w2592h1936.rgb";
+		//imageName = "2014_02_11-17_45-15-w2592h1936.rgb";
 		//imageName = "2014_02_18-13_32-21-w2592h1936.rgb";
-		//imageName = "2014_02_20-16_38-21-w2592h1936.rgb";
+		imageName = "2014_02_20-16_38-21-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-22-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-23-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-24-w2592h1936.rgb";
@@ -92,13 +80,13 @@ int main( int argc, char* argv[] )
 	double newb = 0.9;
 	double newratio = 0.99;
 
-	image *edgeImage;
+	grayImage *edgeImage;
 	if (algorithm == "kirsch")
 	{
 		posWeight = 5;
 		negWeight = -3;
-		highThreshold = 150;
-		lowThreshold = 135;
+		highThreshold = 220;
+		lowThreshold = 157;
 
 		if (mode == "hsvchannels")
 		{
@@ -141,8 +129,53 @@ int main( int argc, char* argv[] )
 	}*/
 
 	// Spara edge filerna i ett sorterat sätt så man vet vilken som är vilken
-	writeImagePPM("Output\\" + algorithm + "\\" + mode + "\\" + filename, edgeImage, fileType::PPM);
+	image *colorEdgeImage = new image(Input->date, edgeImage);
+	writeImagePPM("Output\\" + algorithm + "\\" + mode + "\\" + filename, colorEdgeImage, fileType::PPM);
 
+	
+	/// Group edges in the edge image
+	edgeGroups *groupedEdges = new edgeGroups(edgeImage);
+	
+	/// Create an image for viewing groups
+	rgb8 **imagePixels = new rgb8*[colorEdgeImage->width];
+	for(int x=0; x < colorEdgeImage->width; x++)
+	{
+		imagePixels[x] = new rgb8[colorEdgeImage->height];
+		for(int y=0; y < colorEdgeImage->height; y++)
+		{
+			imagePixels[x][y].red = 0;
+			imagePixels[x][y].green = 0;
+			imagePixels[x][y].blue = 0;
+		}
+	}
+
+	int i = 0;
+	while (!groupedEdges->groups.empty())
+	{
+		edgeGroup group = groupedEdges->groups.front();
+		groupedEdges->groups.pop();
+
+		if (group.size > 10)
+		{
+			i++;
+
+			while (!group.pixelsX.empty())
+			{
+				int x = group.pixelsX.front();
+				int y = group.pixelsY.front();
+				group.pixelsX.pop();
+				group.pixelsY.pop();
+
+				imagePixels[x][y].red = 100 + (155 / groupedEdges->numberOfGroups) * i;
+				imagePixels[x][y].green = 255 - (155 / groupedEdges->numberOfGroups) * i;
+				imagePixels[x][y].blue = 10 * i;
+			}
+		}
+	}
+
+	image *groupedEdgeImage = new image(Input->date, Input->width, Input->height, imagePixels);
+	writeImagePPM("Output\\" + algorithm + "\\" + mode + "\\grouped\\" + filename, groupedEdgeImage, fileType::PPM);
+	
 
 	system("pause");
 

@@ -372,7 +372,7 @@ grayImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeigh
 }
 
 
-image* templateDetectGrayscale(image *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+grayImage* templateDetectGrayscale(image *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
 {
 	
 	int width = colorImage->width;
@@ -385,19 +385,17 @@ image* templateDetectGrayscale(image *colorImage, char posWeight, char negWeight
 
 	grayImage *grayscaleEdgeImage = templateEdgeImage(imageData, posWeight, negWeight, highThreshold, lowThreshold);
 
-	rgb8 **edgePixels = new rgb8*[width];
+	unsigned char **edgePixels = new unsigned char*[width];
 	for(int x=0; x < width; x++)
 	{
-		edgePixels[x] = new rgb8[height];
+		edgePixels[x] = new unsigned char[height];
 		for(int y=0; y < height; y++)
 		{
-			edgePixels[x][y].red = grayscaleEdgeImage->pixel[x][y];
-			edgePixels[x][y].green = grayscaleEdgeImage->pixel[x][y];
-			edgePixels[x][y].blue = grayscaleEdgeImage->pixel[x][y];
+			edgePixels[x][y] = grayscaleEdgeImage->pixel[x][y];
 		}
 	}
 
-	image *edgeImage = new image(colorImage->date, width, height, edgePixels);
+	grayImage *edgeImage = new grayImage(width, height, edgePixels);
 
 	// Garbage Collection
 	delete imageData;
@@ -409,7 +407,7 @@ image* templateDetectGrayscale(image *colorImage, char posWeight, char negWeight
 }
 
 
-image* templateDetectRGBChannels(image *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+grayImage* templateDetectRGBChannels(image *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
 {
 	
 	int width = colorImage->width;
@@ -452,22 +450,20 @@ image* templateDetectRGBChannels(image *colorImage, char posWeight, char negWeig
 
 	cout << "created edgeimages for each grayscale image" << endl;
 
-	rgb8 **edgePixels = new rgb8*[width];
+	unsigned char **edgePixels = new unsigned char*[width];
 	for(int x=0; x < width; x++)
 	{
-		edgePixels[x] = new rgb8[height];
+		edgePixels[x] = new unsigned char[height];
 		for(int y=0; y < height; y++)
 		{
 			unsigned char pixel = ( ((int) redEdgeImage->pixel[x][y]) + ((int) greenEdgeImage->pixel[x][y])
 					+ ((int) blueEdgeImage->pixel[x][y]) + ((int) grayscaleEdgeImage->pixel[x][y]) ) > 0 ? 255 : 0;
 
-			edgePixels[x][y].red = pixel;
-			edgePixels[x][y].green = pixel;
-			edgePixels[x][y].blue = pixel;
+			edgePixels[x][y] = pixel;
 		}
 	}
 
-	image *edgeImage = new image(colorImage->date, width, height, edgePixels);
+	grayImage *edgeImage = new grayImage(width, height, edgePixels);
 
 	cout << "created an edgeimage merged from the grayscale edgeimages" << endl;
 
@@ -484,7 +480,7 @@ image* templateDetectRGBChannels(image *colorImage, char posWeight, char negWeig
 }
 
 
-image* templateDetectHSVChannels(image *rgbImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+grayImage* templateDetectHSVChannels(image *rgbImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
 {
 
 	int width = rgbImage->width;
@@ -508,22 +504,20 @@ image* templateDetectHSVChannels(image *rgbImage, char posWeight, char negWeight
 
 	cout << "created edgeimages for each grayscale image" << endl;
 
-	rgb8 **edgePixels = new rgb8*[width];
+	unsigned char **edgePixels = new unsigned char*[width];
 	for(int x=0; x < width; x++)
 	{
-		edgePixels[x] = new rgb8[height];
+		edgePixels[x] = new unsigned char[height];
 		for(int y=0; y < height; y++)
 		{
 			unsigned char pixel = ( hueEdgeImage->pixel[x][y]
 					+ grayscaleEdgeImage->pixel[x][y] ) > 0 ? 255 : 0;
 
-			edgePixels[x][y].red = pixel;
-			edgePixels[x][y].green = pixel;
-			edgePixels[x][y].blue = pixel;
+			edgePixels[x][y] = pixel;
 		}
 	}
 
-	image *edgeImage = new image(rgbImage->date, width, height, edgePixels);
+	grayImage *edgeImage = new grayImage(width, height, edgePixels);
 
 	cout << "created an edgeimage merged from the grayscale edgeimages" << endl;
 

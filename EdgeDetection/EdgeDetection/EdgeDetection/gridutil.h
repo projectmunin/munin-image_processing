@@ -3,7 +3,9 @@
 
 using namespace std;
 
+int* xDirs;
+int* yDirs;
 
-void getNeighbouringPosition(int x, int y, int i)
+void getNeighbouringPosition(int x, int y, int i);
 
 #endif
