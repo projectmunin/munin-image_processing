@@ -23,6 +23,8 @@
 
 #include "templateDetection.h"
 
+#include "cannyDetector.h"
+
 
 using namespace std;
 
@@ -49,11 +51,24 @@ int main( void )
 
 }
 */
+/*
 int main()
 {
-	image *img;
+	rgbImage *img, *img2;
+	grayImage *gimg,*gimg2, *gimg3, *gimg4;
 
+	
+	img=readImageFile("InputTemp\\2014_02_18-13_32-15_w2592h1936.rgb");
+	gimg = new grayImage(img, ALL);
+	gimg2 = new grayImage(img, ALL);
+	gimg3 = new grayImage(img, ALL);
+	gimg4 = cannyDetector(gimg,gimg2,gimg3,1.0f);
 
+	cout<<"INNAN GRAY->RGB"<<endl;
+	img2 = new rgbImage(gimg2);
+	cout<<"EFTER GRAY->RGB"<<endl;
+	*/
+	/*
 	rgb8 farg;
 	farg.red=220;
 	farg.green=11;
@@ -73,12 +88,14 @@ int main()
 
 	//colorChannelFilter(img, GREEN);
 	//invertFilter(img);
-
+	*/
+/*
 	fileType outType = PPM;
-	writeImagePPM("Output\\", img, outType);
+	writeImagePPM("Output\\", img2, outType);
 
 	delete img;
 
 	//system("pause");
 	return 0;
 }
+*/

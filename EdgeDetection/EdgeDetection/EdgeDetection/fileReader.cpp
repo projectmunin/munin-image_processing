@@ -6,9 +6,8 @@ using namespace std;
 ///[OLD]Returns NULL if a .rgb-file is not detected.
 
 ///Reads the rgb-file from the path.
-image *readImageFile(string path)
+rgbImage *readImageFile(string path)
 {
-
 	string pathRev = reverseString(path);
 	string date = reverseString(pathRev.substr(15,19));
 	int width = atoi(reverseString(pathRev.substr(9,4)).c_str());  //Template YYYY_MM_DD'HH_MM'SS_UU'wWWWWhHHHH.rgb where WWWW is width and HHHH is height.
@@ -32,6 +31,12 @@ image *readImageFile(string path)
 		myFile.read(memblock,size);
 		myFile.close();
 
+		rgb8 **p = new rgb8*[width];
+		for(int k=0;k<width;k++)
+		{
+			p[k] = new rgb8[height];
+		}
+
 		for(int i=0;i<height;i++)
 		{
 			int offset = i*width*3;
@@ -46,14 +51,14 @@ image *readImageFile(string path)
 		}
 		delete[] memblock;
 
-		return new image(date,width,height,p);
+		return new rgbImage(date,width,height,p);
 	}
 	return NULL;
 }
 
 
 ///Reads the next rgb-file in the folder pointed by path.
-image *readNextImageFile(string path)
+rgbImage *readNextImageFile(string path)
 {
 	string fileName;
 	
@@ -90,11 +95,12 @@ image *readNextImageFile(string path)
 	
 }
 
-void writeImagePPM(string path, image *img, fileType type)
+void writeImagePPM(string path, rgbImage *img, fileType type)
 {
 	if(img->pixel==nullptr||img->height<1||img->width<1)
 	{
 		cout<<"Image parameters where not correct."<<endl;
+		system("pause");
 		return;
 	}
 
@@ -111,6 +117,8 @@ void writeImagePPM(string path, image *img, fileType type)
 
 	//Template YYYY_MM_DD'HH_MM'SS_UU'wWWWW'hHHHH.ppm where WWWW is width and HHHH is height.
 	string fileName = img->date + "_w" + to_string(img->width) + "h" + to_string(img->height) + fileEnding;
+	cout<<fileName<<endl;
+	system("pause");
 
 	ofstream file;
 	file.open(path+fileName, ios::binary);
@@ -141,14 +149,13 @@ void writeImagePPM(string path, image *img, fileType type)
 	}
 	file.write(memblock, size);
 	file.close();
-
 	delete[] memblock;
 }
 
 /*
 int main()
 {
-	image *img;
+	rgbImage *img;
 
 	//img=readNextImageFile("Files\\");
 	img=readImageFile("Input\\2014_02_18-13_32-21-w2592h1936.rgb");
