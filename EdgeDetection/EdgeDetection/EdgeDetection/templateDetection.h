@@ -2,7 +2,6 @@
 #define TEMPLATEDETECTION_H
 
 
-
 #include <math.h>
 #include <iostream>
 #include <string>
@@ -10,6 +9,8 @@
 #include <stdio.h>
 
 #include "imgutil.h"
+
+using namespace std;
 
 
 class weightTemplate
@@ -28,8 +29,9 @@ public:
 
 grayImage* templateContrastImage(grayImage* imageData, char posWeight, char negWeight);
 grayImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
-grayImage* templateDetectGrayscale(image *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
-grayImage* templateDetectRGBChannels(image *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
-grayImage* templateDetectHSVChannels(image *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
+grayImage* templateDetectGrayscale(rgbImage *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
+grayImage* templateDetectRGBChannels(rgbImage *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
+grayImage* templateDetectHSVChannels(rgbImage *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
+
 
 #endif

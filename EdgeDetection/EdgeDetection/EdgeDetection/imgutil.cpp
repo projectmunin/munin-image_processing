@@ -6,7 +6,7 @@ using namespace std;
 
 // classes
 
-image::image(string date, int width, int height, rgb8 **pixel)
+rgbImage::rgbImage(string date, int width, int height, rgb8 **pixel)
 {
 	this->date=date;
 	this->width=width;
@@ -14,7 +14,7 @@ image::image(string date, int width, int height, rgb8 **pixel)
 	this->pixel=pixel;
 }
 
-image::image(string date, int width, int height, unsigned char **grayPixel)
+rgbImage::rgbImage(string date, int width, int height, unsigned char **grayPixel)
 {
 	this->date=date;
 	this->width=width;
@@ -23,7 +23,7 @@ image::image(string date, int width, int height, unsigned char **grayPixel)
 	this->pixel = grayToColor(grayPixel, width, height);
 }
 
-image::image(string date, grayImage *imageData)
+rgbImage::rgbImage(string date, grayImage *imageData)
 {
 	this->date=date;
 	this->width=imageData->width;
@@ -32,52 +32,9 @@ image::image(string date, grayImage *imageData)
 	this->pixel = grayToColor(imageData->pixel, imageData->width, imageData->height);
 }
 
-image::~image()
+rgbImage::~rgbImage()
 {
 	cout << "destructing rgbimage" << endl;
-	for(int i=0;i<width;i++)
-	{
-		delete pixel[i];
-	}
-	delete pixel;
-}
-
-
-hsvImage::hsvImage(image *img)
-{
-	date=img->date;
-	width=img->width;
-	height=img->height;
-
-	rgb8 **rgbPixel = img->pixel;
-
-
-	pixel = new hsv*[width];
-	for(int k=0;k<width;k++)
-	{
-		pixel[k] = new hsv[height];
-	}
-
-	for(int i=0;i<width;i++)
-	{
-		for(int j=0;j<height;j++)
-		{
-			pixel[i][j]=rgbToHsv(rgbPixel[i][j]);
-		}
-	}
-}
-
-hsvImage::hsvImage(string date, int width, int height, hsv **pixel)
-{
-	this->date=date;
-	this->width=width;
-	this->height=height;
-	this->pixel=pixel;
-}
-
-hsvImage::~hsvImage()
-{
-	cout << "destructing hsvimage" << endl;
 	for(int i=0;i<width;i++)
 	{
 		delete pixel[i];
@@ -110,24 +67,62 @@ grayImage::grayImage(int width, int height)
 	this->pixel=pixel;
 }
 
-grayImage::grayImage(image *colorImage)
+grayImage::grayImage(rgbImage *img, colorChannel channel)
 {
-	this->width = colorImage->width;
-	this->height = colorImage->height;
-
-	rgb8 **colorPixel = colorImage->pixel;
-	unsigned char **pixel = new unsigned char*[width];
-	for(int x=0; x < width; x++)
+	this->width = img->width;
+	this->height = img->height;
+	
+	this->pixel = new unsigned char*[this->width];
+	for(int i=0;i<width;i++)
 	{
-		pixel[x] = new unsigned char[height];
-		for(int y=0;y < height; y++)
+		this->pixel[i] = new unsigned char[height];
+		for(int j=0;j<height;j++)
 		{
-			pixel[x][y] = (colorPixel[x][y].red + colorPixel[x][y].green + colorPixel[x][y].blue)/3;
+			switch(channel)
+			{
+				case GREEN:
+					this->pixel[i][j]=img->pixel[i][j].green;
+					break;
+				case RED:
+					this->pixel[i][j]=img->pixel[i][j].red;
+					break;
+				case BLUE:
+					this->pixel[i][j]=img->pixel[i][j].blue;
+					break;
+				case ALL:
+					this->pixel[i][j]=(img->pixel[i][j].green+img->pixel[i][j].red+img->pixel[i][j].blue)/3;
+					break;
+			}
 		}
 	}
 
+}
 
-	this->pixel=pixel;
+grayImage::grayImage(hsvImage *img, hsvChannel channel)
+{
+	this->width = img->width;
+	this->height = img->height;
+
+	this->pixel = new unsigned char*[this->width];
+	for(int i=0;i<width;i++)
+	{
+		this->pixel[i] = new unsigned char[height];
+		for(int j=0;j<height;j++)
+		{
+			switch(channel)
+			{
+				case HUE:
+					this->pixel[i][j]=img->pixel[i][j].hue;
+					break;
+				case SATURATION:
+					this->pixel[i][j]=img->pixel[i][j].saturation;
+					break;
+				case VALUE:
+					this->pixel[i][j]=img->pixel[i][j].value;
+					break;
+			}
+		}
+	}
 }
 
 grayImage::~grayImage()
@@ -139,6 +134,43 @@ grayImage::~grayImage()
 	}
 	delete pixel;
 }
+
+hsvImage::hsvImage(rgbImage *img)
+{
+	date=img->date;
+	width=img->width;
+	height=img->height;
+
+	rgb8 **rgbPixel = img->pixel;
+	pixel = new hsv*[width];
+	for(int i=0;i<width;i++)
+	{
+		pixel[i] = new hsv[height];
+		for(int j=0;j<height;j++)
+		{
+			pixel[i][j]=rgbToHsv(rgbPixel[i][j]);
+		}
+	}
+}
+
+hsvImage::hsvImage(string date, int width, int height, hsv **pixel)
+{
+	this->date=date;
+	this->width=width;
+	this->height=height;
+	this->pixel=pixel;
+}
+
+hsvImage::~hsvImage()
+{
+	cout << "destructing hsvimage" << endl;
+	for(int i=0;i<width;i++)
+	{
+		delete pixel[i];
+	}
+	delete pixel;
+}
+
 
 
 
@@ -158,7 +190,6 @@ rgb8** grayToColor(unsigned char** grayData, int width, int height)
 			colorData[x][y].blue = grayData[x][y];
 		}
 	}
-
 	return colorData;
 }
 
@@ -249,7 +280,7 @@ hsv rgbToHsv(rgb8 data)
 	hsv hsvData;
 	hsvData.hue = 60*Ha;
 	hsvData.value = M;
-
+	
 	if(C==0)
 	{
 		hsvData.saturation=0;
@@ -267,7 +298,7 @@ hsv rgbToHsv(rgb8 data)
 }
 
 
-void colorChannelFilter(image *img, colorChannel channel)
+void colorChannelFilter(rgbImage *img, colorChannel channel)
 {
 	for(int i=0;i<img->width;i++)
 	{
@@ -293,7 +324,7 @@ void colorChannelFilter(image *img, colorChannel channel)
 }
 
 
-void grayscaleFilter(image *img)
+void grayscaleFilter(rgbImage *img)
 {
 	for(int i=0;i<img->width;i++)
 	{
@@ -304,7 +335,7 @@ void grayscaleFilter(image *img)
 	}
 }
 
-void invertFilter(image *img)
+void invertFilter(rgbImage *img)
 {
 	for(int i=0;i<img->width;i++)
 	{

@@ -372,13 +372,13 @@ grayImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeigh
 }
 
 
-grayImage* templateDetectGrayscale(image *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+grayImage* templateDetectGrayscale(rgbImage *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
 {
 	
 	int width = colorImage->width;
 	int height = colorImage->height;
 
-	grayImage *imageData = new grayImage(colorImage);
+	grayImage *imageData = new grayImage(colorImage, ALL);
 
 	// easy to change which kind of image it should output 
 	//image *contrastImage = templateContrastImage(imageData, posWeight, negWeight);
@@ -407,7 +407,7 @@ grayImage* templateDetectGrayscale(image *colorImage, char posWeight, char negWe
 }
 
 
-grayImage* templateDetectRGBChannels(image *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+grayImage* templateDetectRGBChannels(rgbImage *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
 {
 	
 	int width = colorImage->width;
@@ -431,7 +431,7 @@ grayImage* templateDetectRGBChannels(image *colorImage, char posWeight, char neg
 
 	printf("created r, g & b channels of size %i * %i = %i\n", width, height, width*height);
 
-	grayImage *imageData = new grayImage(colorImage);
+	grayImage *imageData = new grayImage(colorImage, ALL);
 	grayImage *imageDataRed = new grayImage(width, height, redChannel);
 	grayImage *imageDataGreen = new grayImage(width, height, greenChannel);
 	grayImage *imageDataBlue = new grayImage(width, height, blueChannel);
@@ -481,7 +481,7 @@ grayImage* templateDetectRGBChannels(image *colorImage, char posWeight, char neg
 }
 
 
-grayImage* templateDetectHSVChannels(image *rgbImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
+grayImage* templateDetectHSVChannels(rgbImage *rgbImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
 {
 
 	int width = rgbImage->width;
@@ -489,7 +489,7 @@ grayImage* templateDetectHSVChannels(image *rgbImage, char posWeight, char negWe
 
 	hsvImage *hsvImg = new hsvImage(rgbImage);
 
-	grayImage *imageDataGrayscale = new grayImage(rgbImage);
+	grayImage *imageDataGrayscale = new grayImage(rgbImage, ALL);
 	grayImage *imageDataHSV = new grayImage(width, height, hsvChannelToGrayscale(hsvImg, HUE));
 
 	cout << "Created grayscale images using rgb channels from original image" << endl;
@@ -530,3 +530,4 @@ grayImage* templateDetectHSVChannels(image *rgbImage, char posWeight, char negWe
 	return edgeImage;
 
 }
+

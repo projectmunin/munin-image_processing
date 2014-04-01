@@ -15,6 +15,7 @@
 
 #include "EdgeDetection.h"
 
+#include "cannyDetector.h"
 
 int main( int argc, char* argv[] )
 {
@@ -67,7 +68,7 @@ int main( int argc, char* argv[] )
 
 	// hämta test fil som image
 	//image *Input = readNextImageFile("Input\\");
-	image *Input = readImageFile("Input/" + imageName);
+	rgbImage *Input = readImageFile("Input/" + imageName);
 	writeImagePPM("Output/" + imageName, Input, fileType::PPM);
 
 	colorChannelFilter(Input, GREEN);
@@ -129,7 +130,7 @@ int main( int argc, char* argv[] )
 	}*/
 
 	// Spara edge filerna i ett sorterat sätt så man vet vilken som är vilken
-	image *colorEdgeImage = new image(Input->date, edgeImage);
+	rgbImage *colorEdgeImage = new rgbImage(Input->date, edgeImage);
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/" + filename, colorEdgeImage, fileType::PPM);
 
 
@@ -164,14 +165,14 @@ int main( int argc, char* argv[] )
 			imagePixels[x][y].blue = 255-val;
 		}
 	}
-	image *houghImage = new image(Input->date, hough->width, hough->height, imagePixels);
+	rgbImage *houghImage = new rgbImage(Input->date, hough->width, hough->height, imagePixels);
 	cout << "Created image of the hough-transform" << endl;
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/" + filename, houghImage, fileType::PPM);
 	cout << "Saving hough-image." << endl;
 
 
 	grayImage *reconstructedGrayImage = houghRecronstruction(Input->width, Input->height, hough);
-	image *reconstructedImage = new image(Input->date, reconstructedGrayImage);
+	rgbImage *reconstructedImage = new rgbImage(Input->date, reconstructedGrayImage);
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/reconstructed/" + filename, reconstructedImage, fileType::PPM);
 
 	printf("Pre-calculating neighbour-directions.\n");
@@ -225,7 +226,7 @@ int main( int argc, char* argv[] )
 			}
 		}
 	}
-	image *houghImage2 = new image(Input->date, new grayImage(hough->width, hough->height, imagePixels1));
+	rgbImage *houghImage2 = new rgbImage(Input->date, new grayImage(hough->width, hough->height, imagePixels1));
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/reconstructed/hough_" + filename, houghImage2, fileType::PPM);
 
 
@@ -265,16 +266,16 @@ int main( int argc, char* argv[] )
 				int x = *xIterator;
 				int y = *yIterator;
 
-				imagePixels[x][y].red = 100 + (155 / groupedEdges->numberOfGroups) * i;
-				imagePixels[x][y].green = 255 - (155 / groupedEdges->numberOfGroups) * i;
-				imagePixels[x][y].blue = 10 * i;
+				imagePixels2[x][y].red = 100 + (155 / groupedEdges->numberOfGroups) * i;
+				imagePixels2[x][y].green = 255 - (155 / groupedEdges->numberOfGroups) * i;
+				imagePixels2[x][y].blue = 10 * i;
 			}
 		}
 	}
 	system("pause");
 	cout << "Colored the rgb ** using the edgegroups" << endl;
 
-	image *groupedEdgeImage = new image(Input->date, Input->width, Input->height, imagePixels);
+	rgbImage *groupedEdgeImage = new rgbImage(Input->date, Input->width, Input->height, imagePixels2);
 	cout << "Created group-image for displaying edgegroups" << endl;
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/grouped/" + filename, groupedEdgeImage, fileType::PPM);
 	cout << "Saved group-image" << endl;
