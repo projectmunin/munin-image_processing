@@ -11,3 +11,19 @@
 *.lai
 *.la
 *.a
+
+
+
+#######################################################
+### Ignores everything in the VisualStudio solution ###
+### Unless it is a a *.cpp file                     ###
+#######################################################
+#EdgeDetection/*
+#!*.cpp
+#!*.h
+*.opensdf
+*.sdf
+*.sln
+*.suo
+*.vcxproj
+*.vcxproj.filters
