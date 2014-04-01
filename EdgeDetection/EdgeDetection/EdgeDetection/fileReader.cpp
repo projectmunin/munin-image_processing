@@ -56,7 +56,7 @@ image *readImageFile(string path)
 
 
 ///Reads the next rgb-file in the folder pointed by path.
-image *readNextImageFile(string path)
+/*image *readNextImageFile(string path)
 {
 	string fileName;
 	
@@ -92,7 +92,7 @@ image *readNextImageFile(string path)
 	return readImageFile(path+fileName);
 	
 }
-
+*/
 void writeImagePPM(string path, image *img, fileType type)
 {
 	if(img->pixel==nullptr||img->height<1||img->width<1)

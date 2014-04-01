@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <queue>
+#include <forward_list>
 
 #include "imgutil.h"
 //#include "gridutil.h"
@@ -15,8 +16,8 @@ class edgeGroup
 {
 public:
 	int size;
-	queue<int> pixelsX;
-	queue<int> pixelsY;
+	forward_list<int> pixelsX;
+	forward_list<int> pixelsY;
 
 	edgeGroup();
 
@@ -30,7 +31,7 @@ class edgeGroups
 {
 public:
 	int numberOfGroups;
-	queue<edgeGroup> groups;
+	forward_list<edgeGroup> groups;
 
 	edgeGroups(grayImage *edgeImage);
 

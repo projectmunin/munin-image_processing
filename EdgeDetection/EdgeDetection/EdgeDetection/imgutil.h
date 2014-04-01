@@ -1,7 +1,9 @@
 #ifndef IMGUTIL_H
 #define IMGUTIL_H
 
+#include <iostream>
 #include <string>
+#include <stdio.h>
 
 using namespace std;
 

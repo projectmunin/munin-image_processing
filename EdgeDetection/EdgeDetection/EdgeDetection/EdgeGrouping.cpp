@@ -22,12 +22,13 @@ edgeGroup::edgeGroup()
 {
 	size = 0;
 
-	queue<int> pixelsX;
-	queue<int> pixelsY;
+	forward_list<int> pixelsX;
+	forward_list<int> pixelsY;
 }
 
 edgeGroup::~edgeGroup()
 {
+	cout << "destructing edgegroup" << endl;
 	// stuff?
 }
 
@@ -35,8 +36,8 @@ void edgeGroup::addPixel(int x, int y)
 {
 	size++;
 
-	pixelsX.push(x);
-	pixelsY.push(y);
+	pixelsX.push_front(x);
+	pixelsY.push_front(y);
 }
 
 
@@ -144,6 +145,7 @@ edgeGroups::edgeGroups(grayImage *edgeImage)
 
 edgeGroups::~edgeGroups()
 {
+	cout << "destructing edgegroups" << endl;
 	// stuff?
 }
 
@@ -152,6 +154,6 @@ void edgeGroups::addGroup(edgeGroup newGroup)
 {
 	numberOfGroups++;
 
-	groups.push(newGroup);
+	groups.push_front(newGroup);
 }
 

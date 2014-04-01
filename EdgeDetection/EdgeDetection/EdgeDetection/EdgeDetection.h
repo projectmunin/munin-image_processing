@@ -7,11 +7,13 @@
 
 #include "imgutil.h"
 
-#include "filereader.h"
+#include "fileReader.h"
 
 #include "EdgeGrouping.h"
 
 #include "templateDetection.h"
+
+#include "hough.h"
 // #include "isefPasta.h" // stuff cant be used since it was from the book. Licenses!!! was bad anyway.
 
 using namespace std;

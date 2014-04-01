@@ -34,6 +34,7 @@ image::image(string date, grayImage *imageData)
 
 image::~image()
 {
+	cout << "destructing rgbimage" << endl;
 	for(int i=0;i<width;i++)
 	{
 		delete pixel[i];
@@ -76,6 +77,7 @@ hsvImage::hsvImage(string date, int width, int height, hsv **pixel)
 
 hsvImage::~hsvImage()
 {
+	cout << "destructing hsvimage" << endl;
 	for(int i=0;i<width;i++)
 	{
 		delete pixel[i];
@@ -100,6 +102,10 @@ grayImage::grayImage(int width, int height)
 	for(int x=0; x < width; x++)
 	{
 		pixel[x] = new unsigned char[height];
+		for(int y=0; y < height; y++)
+		{
+			pixel[x][y] = 0;
+		}
 	}
 	this->pixel=pixel;
 }
@@ -126,6 +132,7 @@ grayImage::grayImage(image *colorImage)
 
 grayImage::~grayImage()
 {
+	cout << "destructing grayimage" << endl;
 	for(int i=0;i<width;i++)
 	{
 		delete pixel[i];
