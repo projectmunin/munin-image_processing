@@ -14,6 +14,9 @@
 #include "templateDetection.h"
 
 #include "hough.h"
+
+#include "blackboardIdentification.h"
+
 // #include "isefPasta.h" // stuff cant be used since it was from the book. Licenses!!! was bad anyway.
 
 using namespace std;

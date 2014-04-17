@@ -1,5 +1,5 @@
-#ifndef GRIDUTIL_H
-#define GRIDUTIL_H
+#ifndef HOUGH_H
+#define HOUGH_H
 
 #define PI 3.14159265
 

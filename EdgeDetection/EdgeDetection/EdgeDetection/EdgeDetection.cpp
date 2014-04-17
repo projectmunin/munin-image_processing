@@ -133,9 +133,6 @@ int main( int argc, char* argv[] )
 	rgbImage *colorEdgeImage = new rgbImage(Input->date, edgeImage);
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/" + filename, colorEdgeImage, fileType::PPM);
 
-
-	system("pause");
-
 	cout << "creating hough-transform of image" << endl;
 	houghSpace *hough = houghTransform(edgeImage, 500);
 	cout << "created hough-transform of image" << endl;
@@ -209,8 +206,7 @@ int main( int argc, char* argv[] )
 	cout << "filling image from list of quadrangles" << endl;
 	for (auto iterator = quads->begin(); iterator != quads->end(); ++iterator)
 	{
-		cout << "painting a quad" << endl;
-		quadrangle *quad = *(++iterator);
+		quadrangle *quad = *iterator;
 		for (int i = 0; i < 4; i++)
 		{
 			int x1 = quad->cornersX[i];
@@ -232,9 +228,41 @@ int main( int argc, char* argv[] )
 	rgbImage *quadImage = new rgbImage(Input->date, new grayImage(edgeImage->width, edgeImage->height, imagePixelsQuad));
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/quadrangles/" + filename, quadImage, fileType::PPM);
 	cout << "saved image of quadrangles" << endl;
-
-
+	
 	system("pause");
+	cout << "Identifying blackboard-quad" << endl;
+	quadrangle* blackboard = identifyBlackboard(quads, edgeImage->width, edgeImage->height, edgeImage->width/2, 0, 2.0, 0.9);
+	cout << "Identified blackboard-quad" << endl;
+	cout << "filling image with blackboard" << endl;
+	for(int x=0; x < edgeImage->width; x++)
+	{
+		imagePixelsQuad[x] = new unsigned char[edgeImage->height];
+		for(int y=0; y < edgeImage->height; y++)
+		{
+			imagePixelsQuad[x][y] = 0;
+		}
+	}
+	for (int i = 0; i < 4; i++)
+	{
+		int x1 = blackboard->cornersX[i];
+		int y1 = blackboard->cornersY[i];
+		int x2 = blackboard->cornersX[(i+1)%4];
+		int y2 = blackboard->cornersY[(i+1)%4];
+		double dirX = (double) x2 - (double) x1;
+		double dirY = (double) y2 - (double) y1;
+
+		for (double t = 0; t <= 1; t+=0.0001)
+		{
+			int x = x1 + (int) (dirX * t);
+			int y = y1 + (int) (dirY * t);
+			imagePixelsQuad[x][y] = 255;
+		}
+	}
+	cout << "saving image of quadrangles" << endl;
+	rgbImage *blackboardImage = new rgbImage(Input->date, new grayImage(edgeImage->width, edgeImage->height, imagePixelsQuad));
+	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/quadrangles/blackboard_" + filename, blackboardImage, fileType::PPM);
+	cout << "saved image of quadrangles" << endl;
+
 	/*
 	/// Group edges in the edge image
 	edgeGroups *groupedEdges = new edgeGroups(edgeImage);

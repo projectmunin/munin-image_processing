@@ -7,7 +7,7 @@
 *****                  Jonathan Olsson (jonolss@student.chalmers.se)                           *****
 *****                                                                                          *****
 *****                                                                                          *****
-*****     Purpose: esting template-based edgedetection                                         *****
+*****     Purpose: Perform edge-detection on an image.                                         *****
 *****                                                                                          *****
 ***************************************************************************************************/
 
