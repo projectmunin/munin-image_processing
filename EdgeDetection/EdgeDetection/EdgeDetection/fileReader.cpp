@@ -103,7 +103,6 @@ void writeImagePPM(string path, rgbImage *img, fileType type)
 	if(img->pixel==nullptr||img->height<1||img->width<1)
 	{
 		cout<<"Image parameters where not correct."<<endl;
-		system("pause");
 		return;
 	}
 
@@ -121,7 +120,6 @@ void writeImagePPM(string path, rgbImage *img, fileType type)
 	//Template YYYY_MM_DD'HH_MM'SS_UU'wWWWW'hHHHH.ppm where WWWW is width and HHHH is height.
 	string fileName = img->date + "_w" + to_string(img->width) + "h" + to_string(img->height) + fileEnding;
 	cout<<fileName<<endl;
-	system("pause");
 
 	ofstream file;
 	file.open(path+fileName, ios::binary);

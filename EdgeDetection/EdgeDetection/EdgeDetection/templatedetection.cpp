@@ -467,7 +467,6 @@ grayImage* templateDetectRGBChannels(rgbImage *colorImage, char posWeight, char 
 
 	cout << "created an edgeimage merged from the grayscale edgeimages" << endl;
 
-	system("pause");
 	/// Garbage Collection
 	delete imageData;
 	delete imageDataRed;

@@ -137,16 +137,16 @@ int main( int argc, char* argv[] )
 	system("pause");
 
 	cout << "creating hough-transform of image" << endl;
-	houghSpace *hough = houghTransform(edgeImage, 2*3.14*100); // one line every 0.1 degrees.
+	houghSpace *hough = houghTransform(edgeImage, 500);
 	cout << "created hough-transform of image" << endl;
 	cout << "Creating image of the hough-transform" << endl;
-	unsigned int **parameterSpace = hough->pixels;
+	int **parameterSpace = hough->pixels;
 	double high = hough->highestValue;
 	unsigned char **houghPixels = new unsigned char*[hough->width];
-	for (unsigned int x = 0; x < hough->width; x++)
+	for (int x = 0; x < hough->width; x++)
 	{
 		houghPixels[x] = new unsigned char[hough->height];
-		for (unsigned int y = 0; y < hough->height; y++)
+		for (int y = 0; y < hough->height; y++)
 		{
 			houghPixels[x][y] = ((unsigned char) ((((double) parameterSpace[x][y]) / high) * 255));
 			//printf("%i,%i - imageval %i; realval %i; highest %i\n", x, y, houghPixels[x][y], parameterSpace[x][y], hough->highestValue);
@@ -154,84 +154,88 @@ int main( int argc, char* argv[] )
 	}
 
 	rgb8 **imagePixels = new rgb8*[hough->width];
-	for(unsigned int x=0; x < hough->width; x++)
+	for(int x=0; x < hough->width; x++)
 	{
 		imagePixels[x] = new rgb8[hough->height];
-		for(unsigned int y=0; y < hough->height; y++)
+		for(int y=0; y < hough->height; y++)
 		{
 			unsigned char val = pow(houghPixels[x][y],1.0/8.0) * pow(255,7.0/8.0);
 			imagePixels[x][y].red = val;
-			imagePixels[x][y].green = 0;
-			imagePixels[x][y].blue = 255-val;
+			imagePixels[x][y].green = val;
+			imagePixels[x][y].blue = val;
 		}
 	}
 	rgbImage *houghImage = new rgbImage(Input->date, hough->width, hough->height, imagePixels);
 	cout << "Created image of the hough-transform" << endl;
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/" + filename, houghImage, fileType::PPM);
-	cout << "Saving hough-image." << endl;
+	cout << "Saved hough-image." << endl;
 
-
-	grayImage *reconstructedGrayImage = houghRecronstruction(Input->width, Input->height, hough);
-	rgbImage *reconstructedImage = new rgbImage(Input->date, reconstructedGrayImage);
-	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/reconstructed/" + filename, reconstructedImage, fileType::PPM);
-
-	printf("Pre-calculating neighbour-directions.\n");
-	int* xDirs = new int[8];
-	int* yDirs = new int[8];
-	for (int i=0; i < 9; i++)
+	
+	cout << "filtering hough-image." << endl;
+	houghSpace* filteredHough = houghFiltering(hough, 500, 10, 50);
+	cout << "creating image from filtered hough-image." << endl;
+	unsigned char **imagePixels1 = new unsigned char*[filteredHough->width];
+	for(int x=0; x < filteredHough->width; x++)
 	{
-		// Get neighbour pos
-		int xDir = -1 + i%3;
-		int yDir = -1 + i/3;
-
-		if (i < 3)
+		imagePixels1[x] = new unsigned char[filteredHough->height];
+		for(int y=0; y < filteredHough->height; y++)
 		{
-			xDirs[i] = xDir;
-			yDirs[i] = yDir;
-		}
-		else if (i > 3)
-		{
-			xDirs[i-1] = xDir;
-			yDirs[i-1] = yDir;
+			unsigned char val = pow(((((double) filteredHough->pixels[x][y]) / high) * 255),1.0/8.0) * pow(255,7.0/8.0);
+			imagePixels1[x][y] = val;
 		}
 	}
-	unsigned char **imagePixels1 = new unsigned char*[hough->width];
-	for(unsigned int x=0; x < hough->width; x++)
+	rgbImage *houghImage2 = new rgbImage(Input->date, new grayImage(filteredHough->width, filteredHough->height, imagePixels1));
+	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/reconstructed/hough_" + filename, houghImage2, fileType::PPM);
+	cout << "saved filtered hough-image." << endl;
+
+	cout << "reconstructing hough-image." << endl;
+	grayImage *reconstructedGrayImage = houghRecronstruction(Input->width, Input->height, filteredHough);
+	rgbImage *reconstructedImage = new rgbImage(Input->date, reconstructedGrayImage);
+	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/reconstructed/" + filename, reconstructedImage, fileType::PPM);
+	cout << "Saved reconstructed image." << endl;
+
+	cout << "Identifying quadrangles" << endl;
+	list<quadrangle*>* quads = houghIdentifyQuadrangles(filteredHough, edgeImage, 100, 40, 100, 40, 0.5, 50);
+	cout << "Creating image for list of quadrangles" << endl;
+	unsigned char **imagePixelsQuad = new unsigned char*[edgeImage->width];
+	for(int x=0; x < edgeImage->width; x++)
 	{
-		imagePixels1[x] = new unsigned char[hough->height];
-		for(unsigned int y=0; y < hough->height; y++)
+		imagePixelsQuad[x] = new unsigned char[edgeImage->height];
+		for(int y=0; y < edgeImage->height; y++)
 		{
-			unsigned int curVal = parameterSpace[x][y];
-			imagePixels1[x][y] = 0;
-			if (curVal > 500)
+			imagePixelsQuad[x][y] = 0;
+		}
+	}
+	cout << "filling image from list of quadrangles" << endl;
+	for (auto iterator = quads->begin(); iterator != quads->end(); ++iterator)
+	{
+		cout << "painting a quad" << endl;
+		quadrangle *quad = *(++iterator);
+		for (int i = 0; i < 4; i++)
+		{
+			int x1 = quad->cornersX[i];
+			int y1 = quad->cornersY[i];
+			int x2 = quad->cornersX[(i+1)%4];
+			int y2 = quad->cornersY[(i+1)%4];
+			double dirX = (double) x2 - (double) x1;
+			double dirY = (double) y2 - (double) y1;
+
+			for (double t = 0; t <= 1; t+=0.0001)
 			{
-				bool localMax = true;
-				for (char i = 0; i < 8; i++)
-				{
-					for (char n = 1; n < 25; n++)
-					{
-						unsigned int testAng = x + xDirs[i]*n;
-						unsigned int testRad = y + yDirs[i]*n;
-						if (testAng < hough->width && testRad < hough->height && curVal < parameterSpace[testAng][testRad])
-						{
-							localMax = false;
-						}
-					}
-				}
-				imagePixels1[x][y] = 100;
-				if (localMax)
-				{
-					imagePixels1[x][y] = 255;
-				}
+				int x = x1 + (int) (dirX * t);
+				int y = y1 + (int) (dirY * t);
+				imagePixelsQuad[x][y] = 255;
 			}
 		}
 	}
-	rgbImage *houghImage2 = new rgbImage(Input->date, new grayImage(hough->width, hough->height, imagePixels1));
-	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/reconstructed/hough_" + filename, houghImage2, fileType::PPM);
+	cout << "saving image of quadrangles" << endl;
+	rgbImage *quadImage = new rgbImage(Input->date, new grayImage(edgeImage->width, edgeImage->height, imagePixelsQuad));
+	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/quadrangles/" + filename, quadImage, fileType::PPM);
+	cout << "saved image of quadrangles" << endl;
 
 
 	system("pause");
-	
+	/*
 	/// Group edges in the edge image
 	edgeGroups *groupedEdges = new edgeGroups(edgeImage);
 	cout << "created edgegroups instance from edgeimage" << endl;
@@ -279,9 +283,10 @@ int main( int argc, char* argv[] )
 	cout << "Created group-image for displaying edgegroups" << endl;
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/grouped/" + filename, groupedEdgeImage, fileType::PPM);
 	cout << "Saved group-image" << endl;
-
+	
 
 	system("pause");
+	*/
 
 	return 0;
 
