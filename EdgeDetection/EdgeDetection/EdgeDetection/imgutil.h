@@ -34,6 +34,7 @@ enum hsvChannel
 class rgbImage;
 class grayImage;
 class hsvImage;
+class edgeImage;
 
 class rgbImage
 {
@@ -46,6 +47,7 @@ public:
 	rgbImage(string date, int width, int height, rgb8 **pixel);
 	rgbImage(string date, int width, int height, unsigned char **grayPixel);
 	rgbImage(string date, grayImage *imageData);
+	rgbImage(string date, edgeImage *imageData);
 	~rgbImage();
 };
 
@@ -74,6 +76,20 @@ public:
 	grayImage(hsvImage *img, hsvChannel channel);
 	grayImage(int width, int height);
 	~grayImage();
+};
+
+
+class edgeImage
+{
+public:
+	int width;
+	int height;
+	unsigned char **pixel;
+	float **angle;
+
+	edgeImage(int width, int height, unsigned char **pixel, float **angle);
+	edgeImage(int width, int height);
+	~edgeImage();
 };
 
 rgb8** grayToColor(unsigned char** grayData, int width, int height);

@@ -32,6 +32,35 @@ rgbImage::rgbImage(string date, grayImage *imageData)
 	this->pixel = grayToColor(imageData->pixel, imageData->width, imageData->height);
 }
 
+rgbImage::rgbImage(string date, edgeImage *imageData)
+{
+	this->date=date;
+	this->width=imageData->width;
+	this->height=imageData->height;
+
+	this->pixel = new rgb8*[this->width];
+	for(int i=0;i<width;i++)
+	{
+		this->pixel[i] = new rgb8[height];
+		for(int j=0;j<height;j++)
+		{
+			unsigned char val = imageData->pixel[i][j];
+			if (val > 0)
+			{
+				this->pixel[i][j].red = 255 - (imageData->angle[i][j] / 360) * 255;
+				this->pixel[i][j].green = (imageData->angle[i][j] / 360) * 255;
+				this->pixel[i][j].blue = val;
+			}
+			else
+			{
+				this->pixel[i][j].red = 0;
+				this->pixel[i][j].green = 0;
+				this->pixel[i][j].blue = 0;
+			}
+		}
+	}
+}
+
 rgbImage::~rgbImage()
 {
 	cout << "destructing rgbimage" << endl;
@@ -169,6 +198,57 @@ hsvImage::~hsvImage()
 		delete pixel[i];
 	}
 	delete pixel;
+}
+
+
+
+edgeImage::edgeImage(int width, int height, unsigned char **pixel, float **angle)
+{
+	this->width=width;
+	this->height=height;
+	this->pixel=pixel;
+	this->angle=angle;
+}
+
+edgeImage::edgeImage(int width, int height)
+{
+	this->width=width;
+	this->height=height;
+
+	unsigned char **pixel = new unsigned char*[width];
+	for(int x=0; x < width; x++)
+	{
+		pixel[x] = new unsigned char[height];
+		for(int y=0; y < height; y++)
+		{
+			pixel[x][y] = 0;
+		}
+	}
+	this->pixel=pixel;
+
+	float **angle = new float*[width];
+	for(int x=0; x < width; x++)
+	{
+		angle[x] = new float[height];
+		for(int y=0; y < height; y++)
+		{
+			angle[x][y] = 0.0;
+		}
+	}
+	this->angle=angle;
+}
+
+
+edgeImage::~edgeImage()
+{
+	cout << "destructing edgeimage" << endl;
+	for(int i=0;i<width;i++)
+	{
+		delete pixel[i];
+		delete angle[i];
+	}
+	delete pixel;
+	delete angle;
 }
 
 

@@ -71,7 +71,7 @@ int main( int argc, char* argv[] )
 	rgbImage *Input = readImageFile("Input/" + imageName);
 	writeImagePPM("Output/" + imageName, Input, fileType::PPM);
 
-	colorChannelFilter(Input, GREEN);
+	//colorChannelFilter(Input, GREEN);
 
 	// Olika edgedetection tester
 	int posWeight;
@@ -81,7 +81,7 @@ int main( int argc, char* argv[] )
 	double newb = 0.9;
 	double newratio = 0.99;
 
-	grayImage *edgeImage;
+	edgeImage *edgeImage;
 	if (algorithm == "kirsch")
 	{
 		posWeight = 5;
@@ -129,12 +129,13 @@ int main( int argc, char* argv[] )
 				+ "_ratio" + to_string(newratio);
 	}*/
 
+
 	// Spara edge filerna i ett sorterat sätt så man vet vilken som är vilken
 	rgbImage *colorEdgeImage = new rgbImage(Input->date, edgeImage);
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/" + filename, colorEdgeImage, fileType::PPM);
 
 	cout << "creating hough-transform of image" << endl;
-	houghSpace *hough = houghTransform(edgeImage, 500);
+	houghSpace *hough = houghTransform(edgeImage, 500, 0.35);
 	cout << "created hough-transform of image" << endl;
 	cout << "Creating image of the hough-transform" << endl;
 	int **parameterSpace = hough->pixels;
@@ -169,7 +170,7 @@ int main( int argc, char* argv[] )
 
 	
 	cout << "filtering hough-image." << endl;
-	houghSpace* filteredHough = houghFiltering(hough, 500, 10, 50);
+	houghSpace* filteredHough = houghFiltering(hough, 400, 10, 50);
 	cout << "creating image from filtered hough-image." << endl;
 	unsigned char **imagePixels1 = new unsigned char*[filteredHough->width];
 	for(int x=0; x < filteredHough->width; x++)
@@ -230,8 +231,9 @@ int main( int argc, char* argv[] )
 	cout << "saved image of quadrangles" << endl;
 	
 	system("pause");
+	
 	cout << "Identifying blackboard-quad" << endl;
-	quadrangle* blackboard = identifyBlackboard(quads, edgeImage->width, edgeImage->height, edgeImage->width/2, 0, 2.0, 0.9);
+	quadrangle* blackboard = identifyBlackboard(quads, edgeImage->width, edgeImage->height, edgeImage->width/2, 0, 1851, 3.5);
 	cout << "Identified blackboard-quad" << endl;
 	cout << "filling image with blackboard" << endl;
 	for(int x=0; x < edgeImage->width; x++)
@@ -262,6 +264,8 @@ int main( int argc, char* argv[] )
 	rgbImage *blackboardImage = new rgbImage(Input->date, new grayImage(edgeImage->width, edgeImage->height, imagePixelsQuad));
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/quadrangles/blackboard_" + filename, blackboardImage, fileType::PPM);
 	cout << "saved image of quadrangles" << endl;
+
+	system("pause");
 
 	/*
 	/// Group edges in the edge image

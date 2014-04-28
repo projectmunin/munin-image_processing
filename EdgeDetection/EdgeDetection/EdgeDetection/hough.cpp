@@ -79,7 +79,7 @@ quadrangle::~quadrangle()
 
 
 
-houghSpace* houghTransform(grayImage* edgeimage, int angleResolution)
+houghSpace* houghTransform(edgeImage* edgeimage, int angleResolution, float angleMargin)
 {
 	
 	int width = edgeimage->width;
@@ -108,6 +108,7 @@ houghSpace* houghTransform(grayImage* edgeimage, int angleResolution)
 	// Would remove the need to go through every pixel using an if-statement checking val != 0
 	int highestValue = 0;
 	unsigned char **edgedata = edgeimage->pixel;
+	float **edgeAngles = edgeimage->angle;
 	register int ang;
 	for (int x = -width/2; x < width/2; x++)
 	{
@@ -115,20 +116,24 @@ houghSpace* houghTransform(grayImage* edgeimage, int angleResolution)
 		{
 			if (edgedata[x+width/2][y+height/2] != 0)
 			{
-				// Will change to use the angle of the edge to limit the range of angles in parameter space to loop through.
-				for (ang = 0; ang < angleResolution; ang++)
+				int angle = edgeAngles[x+width/2][y+height/2] * ((double) angleResolution) / 360.0;//(2.0 * PI);
+				int margin = angleResolution * angleMargin;
+				for (ang = angle - margin; ang < angle + margin; ang++)
 				{
-					double degrees = ((double) ang) * 2.0 * PI / (double) angleResolution;
-					double cosVal = cos(degrees);
-					double sinVal = sin(degrees);
-					int rad = x*cosVal+y*sinVal + maxRadius/2; // TODO: calculate the sin and cos values once beforehand, rather than once per pixel.
-					int val = parameterSpace[ang][rad] + 1;
-
-					parameterSpace[ang][rad] = val;
-
-					if (highestValue < val)
+					if (ang >= 0 && ang < angleResolution)
 					{
-						highestValue = val;
+						double degrees = ((double) ang) * 2.0 * PI / (double) angleResolution;
+						double cosVal = cos(degrees);
+						double sinVal = sin(degrees);
+						int rad = x*cosVal+y*sinVal + maxRadius/2; // TODO: calculate the sin and cos values once beforehand, rather than once per pixel.
+						int val = parameterSpace[ang][rad] + 1;
+
+						parameterSpace[ang][rad] = val;
+
+						if (highestValue < val)
+						{
+							highestValue = val;
+						}
 					}
 				}
 			}
@@ -156,7 +161,7 @@ houghSpace* houghFiltering(houghSpace *originalHough, int threshold, int windowW
 		for (rad = 0; rad < hough->height; rad++)
 		{
 			int curVal = houghPixels[ang][rad];
-			if (curVal > 400)
+			if (curVal > threshold)
 			{
 				bool localMax = true;
 				int windowX = ang - windowWidth;
@@ -241,7 +246,7 @@ houghSpace* houghFiltering(houghSpace *originalHough, int threshold, int windowW
 	* holeTolerance
 		* the amount of holes the quadrangles edges may consist of, in percent
 */
-list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, grayImage *edgeImage, int horizontalDistance, double horizontalAngMargin, int perpendicularDistance, double perpendicularAngMargin, double holeTolerance, int continousHoleTolerance)
+list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeimage, int horizontalDistance, double horizontalAngMargin, int perpendicularDistance, double perpendicularAngMargin, double holeTolerance, int continousHoleTolerance)
 {
 	list<quadrangle*> *quadrangles = new list<quadrangle*>;
 
@@ -312,32 +317,9 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, grayImage *edgeIm
 														double ang2 = linesAng[line2] * 2 * PI / hough->width;
 														int rad2 = linesRad[line2] - hough->height/2;
 
-														
-
-														//double x = edgeImage->width/2 + cos(ang) * (double) rad;
-														//double y = edgeImage->height/2 - sin(ang) * (double) rad;
-
-														// Multiplied by magic number to avoid flooring errors 
-														//double x2 = x - sin(ang) * 10000;
-														//double y2 = y + cos(ang) * 10000;
-
-														//double x3 = edgeImage->width/2 + cos(ang2) * (double) rad2;
-														//double y3 = edgeImage->height/2 - sin(ang2) * (double) rad2;
-
-														//double x4 = x3 - sin(ang2) * 10000;
-														//double y4 = y3 + cos(ang2) * 10000;
-
 														/// Get intersection
-														int xCorner = edgeImage->width/2 + (rad*sin(ang2) - rad2*sin(ang)) / (cos(ang)*sin(ang2) - cos(ang2)*sin(ang));
-														int yCorner = edgeImage->height/2 + (rad2*cos(ang) - rad*cos(ang2)) / (sin(ang2)*cos(ang) - sin(ang)*cos(ang2));
-														//int xCorner = ((x*y2 - y*x2)*(x3-x4) - (x-x2)*(x3*y4 - y3*x4)) / ((x-x2)*(y3-y4)-(y-y2)*(x3-x4));
-														//int yCorner = ((x*y2 - y*x2)*(y3-y4) - (y-y2)*(x3*y4 - y3*x4)) / ((x-x2)*(y3-y4)-(y-y2)*(x3-x4));
-
-														printf("line1: angpixel=%i; angRad=%e; angDeg=%e; rad=%i\n", linesAng[line], ang, 360 * ang / (2 * PI), rad);
-														//printf("line1: x=%f; y=%f\n", x, y);
-														//printf("line2: ang=%e; rad=%i\n", ang2, rad2);
-														//printf("line1: x3=%f; y3=%f\n", x3, y3);
-														printf("xCorner: %i yCorner: %i\n", xCorner, yCorner);
+														int xCorner = edgeimage->width/2 + (rad*sin(ang2) - rad2*sin(ang)) / (cos(ang)*sin(ang2) - cos(ang2)*sin(ang));
+														int yCorner = edgeimage->height/2 + (rad2*cos(ang) - rad*cos(ang2)) / (sin(ang2)*cos(ang) - sin(ang)*cos(ang2));
 
 														cornersX[line] = xCorner;
 														cornersY[line] = yCorner;
@@ -379,8 +361,8 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, grayImage *edgeIm
 			int x2 = quad->cornersX[i2];
 			int y2 = quad->cornersY[i2];
 
-			if ( (x >= 0 && x < edgeImage->width && y >= 0 && y < edgeImage->height)
-					|| (x2 >= 0 && x2 < edgeImage->width && y2 >= 0 && y2 < edgeImage->height))
+			if ( (x >= 0 && x < edgeimage->width && y >= 0 && y < edgeimage->height)
+					|| (x2 >= 0 && x2 < edgeimage->width && y2 >= 0 && y2 < edgeimage->height))
 			{
 
 				int xError = (int)x2 - (int)x;
@@ -403,7 +385,7 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, grayImage *edgeIm
 					{
 						quad->pixelsCovered++;
 
-						if (edgeImage->pixel[curX,curY] == 0)
+						if (edgeimage->pixel[curX,curY] == 0)
 						{
 							quad->holes++;
 							continousHoles++;

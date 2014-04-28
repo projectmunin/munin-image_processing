@@ -28,10 +28,10 @@ public:
 
 
 grayImage* templateContrastImage(grayImage* imageData, char posWeight, char negWeight);
-grayImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
-grayImage* templateDetectGrayscale(rgbImage *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
-grayImage* templateDetectRGBChannels(rgbImage *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
-grayImage* templateDetectHSVChannels(rgbImage *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
+edgeImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
+edgeImage* templateDetectGrayscale(rgbImage *colorImage, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
+edgeImage* templateDetectRGBChannels(rgbImage *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
+edgeImage* templateDetectHSVChannels(rgbImage *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold);
 
 
 #endif

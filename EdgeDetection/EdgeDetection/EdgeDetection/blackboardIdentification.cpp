@@ -17,7 +17,7 @@
 #include "hough.h"
 
 
-quadrangle* identifyBlackboard(list<quadrangle*> *quads, int imageWidth, int imageHeight, int idealCenterX, int idealCenterY, double idealRatio, int idealSize)
+quadrangle* identifyBlackboard(list<quadrangle*> *quads, int imageWidth, int imageHeight, int idealCenterX, int idealCenterY, int idealSize, double idealRatio)
 {
 	quadrangle* bestQuad = *(quads->begin());
 	double bestWeight = 0;
@@ -46,27 +46,28 @@ quadrangle* identifyBlackboard(list<quadrangle*> *quads, int imageWidth, int ima
 		int width = ( sqrt( pow(x1-x0,2) + pow(y1-y0,2) ) + sqrt( pow(x3-x2,2) + pow(y3-y2,2) ) ) / 2;
 		int height = ( sqrt( pow(x2-x1,2) + pow(y2-y1,2) ) + sqrt( pow(x0-x3,2) + pow(y0-y3,2) ) ) / 2;
 
-		double ratio = width/height; // Is ratio h/w or w/h? does not rly matter as long as ideal is specified the same way.
+		double ratio = ((double) width) / ((double) height); // Is ratio h/w or w/h? does not rly matter as long as ideal is specified the same way.
 
 		/// Size is seen as the diagonal length over the quad for simplicity
 		int size = ( sqrt( pow(x2-x0,2) + pow(y2-y0,2) ) + sqrt( pow(x1-x3,2) + pow(y1-y3,2) ) ) / 2;
 
 
 		/// Calculates how far off the quad is from the ideal.
-		double errorCenterX = (idealCenterX - centerX) / imageWidth; // Error in percent of image dimensions
-		double errorCenterY = (idealCenterY - centerY) / height; // Error in percent of image dimensions
-		double errorRatio = idealRatio - ratio;
-		double errorSize = (idealSize - size) / (imageWidth > imageHeight ? sqrt( pow(imageWidth,2) + pow(imageWidth/ratio,2) ) : sqrt( pow(imageHeight*ratio,2) + pow(imageHeight,2) ) ); // Error in percent of largest size possible for the image
+		double errorCenterX = abs(idealCenterX - centerX) / (double) imageWidth; // Error in percent of image dimensions
+		double errorCenterY = abs(idealCenterY - centerY) / (double) imageHeight; // Error in percent of image dimensions
+		double errorRatio = abs(idealRatio - ratio);
+		double errorSize = abs(idealSize - size) / (((double) imageWidth)/((double) imageHeight) > idealRatio ? sqrt( pow(imageWidth,2) + pow(imageWidth/idealRatio,2) ) : sqrt( pow(imageHeight*idealRatio,2) + pow(imageHeight,2) ) ); // Error in percent of largest size possible for the image
 
 		/// Weighting the quads proximity to ideal properties. Also ensures the values are within certain bounds.
-		double weightOffsetX	= (errorCenterX	< 0.9			? 1 : 0) * (1/(1+errorCenterX))	* 10; // Given how wide the board is, and prior cropping, this should be pretty light.
-		double weightOffsetY	= (errorCenterY	< 1.0			? 1 : 0) * (1/(1+errorCenterY))	* 100; // The height the board is at matters a lot to us when we identify that a board is ready, which carries over to this identification too.
-		double weightRatio		= (errorRatio	< idealRatio/3	? 1 : 0) * (1/(1+errorRatio))	* 1000; // Since this error is inherently low, it needs to scale by a larger number. It also tells us a lot about the shape of the rectangle, which is very important.
-		double weightSize		= (errorSize	< 0.1			? 1 : 0) * (1/(1+errorSize))	* 1000; // The size is important, and should be pretty much consistent every time it is a board.
+		double weightOffsetX	= (errorCenterX	< 0.9			? 1.0 : 0.0) * (1.0/(1.0+errorCenterX))	* 10.0; // Given how wide the board is, and prior cropping, this should be pretty light.
+		double weightOffsetY	= (errorCenterY	< 1.0			? 1.0 : 0.0) * (1.0/(1.0+errorCenterY))	* 100.0; // The height the board is at matters a lot to us when we identify that a board is ready, which carries over to this identification too.
+		double weightRatio		= (errorRatio	< idealRatio/3	? 1.0 : 0.0) * (1.0/(1.0+errorRatio))	* 1000.0; // Since this error is inherently low, it needs to scale by a larger number. It also tells us a lot about the shape of the rectangle, which is very important.
+		double weightSize		= (errorSize	< 0.1			? 1.0 : 0.0) * (1.0/(1.0+errorSize))	* 1000.0; // The size is important, and should be pretty much consistent every time it is a board.
 
 		double weight = weightOffsetX + weightOffsetY + weightRatio + weightSize;
 		double weight2 = weightOffsetX * weightOffsetY * weightRatio * weightSize;
-		printf("quad weights: weight = %e; weight2 = %e", weight, weight2);
+		printf("quad weights: weight = %e; weight2 = %e\nweightOffsetX = %e\nweightOffsetY = %e\nweightRatio = %e\nweightSize = %e\n", weight, weight2, weightOffsetX, weightOffsetY, weightRatio, weightSize);
+		printf("errorCenterX = % e\nerrorCenterY = %e\nerrorRatio = %e\nerrorSize = %e\n", errorCenterX, errorCenterY, errorRatio, errorSize);
 
 		if (bestWeight < weight)
 		{

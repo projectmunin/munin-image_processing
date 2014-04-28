@@ -42,9 +42,9 @@ public:
 };
 
 
-houghSpace* houghTransform(grayImage* edgeimage, int angleResolution);
+houghSpace* houghTransform(edgeImage* edgeimage, int angleResolution, float angleMargin);
 houghSpace* houghFiltering(houghSpace *hough, int threshold, int windowWidth, int windowHeight);
 grayImage* houghRecronstruction(int width, int height, houghSpace *hough);
-list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, grayImage *edgeImage, int horizontalDistance, double horizontalAngMargin, int perpendicularDistance, double perpendicularAngMargin, double holeTolerance, int continousHoleTolerance);
+list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeImage, int horizontalDistance, double horizontalAngMargin, int perpendicularDistance, double perpendicularAngMargin, double holeTolerance, int continousHoleTolerance);
 
 #endif
