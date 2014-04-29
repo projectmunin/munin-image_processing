@@ -44,7 +44,7 @@ int main( int argc, char* argv[] )
 		//imageName = "2014_02_20-16_38-22-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-23-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-24-w2592h1936.rgb";
-		imageName = "2014_02_20-16_38-25-w2592h1936.rgb";
+		//imageName = "2014_02_20-16_38-25-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-26-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-27-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-28-w2592h1936.rgb";
@@ -52,13 +52,22 @@ int main( int argc, char* argv[] )
 		//imageName = "2014_02_20-16_38-30-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-31-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-32-w2592h1936.rgb";
+		//imageName = "2014-04-28_15-13-20_w2592h1936.rgb";
+		//imageName = "2014-04-28_15-13-27_w2592h1936.rgb";
+		//imageName = "2014-04-28_15-13-29_w2592h1936.rgb";
+		//imageName = "2014-04-28_15-13-36_w2592h1936.rgb";
+		//imageName = "2014-04-28_15-13-37_w2592h1936.rgb";
+		//imageName = "2014-04-28_15-13-38_w2592h1936.rgb";
+		//imageName = "2014-04-28_15-13-39_w2592h1936.rgb";
+		//imageName = "2014-04-28_15-13-40_w2592h1936.rgb";
+		imageName = "2014-04-28_15-13-41_w2592h1936.rgb";
 
 		algorithm = "kirsch";
 		//algorithm = "isef";
 
 		//mode = "hsvchannels";
-		mode = "rgbchannels";
-		//mode = "grayscale";
+		//mode = "rgbchannels";
+		mode = "grayscale";
 	}
 	else
 	{
@@ -70,8 +79,6 @@ int main( int argc, char* argv[] )
 	//image *Input = readNextImageFile("Input\\");
 	rgbImage *Input = readImageFile("Input/" + imageName);
 	writeImagePPM("Output/" + imageName, Input, fileType::PPM);
-
-	//colorChannelFilter(Input, GREEN);
 
 	// Olika edgedetection tester
 	int posWeight;
@@ -86,8 +93,8 @@ int main( int argc, char* argv[] )
 	{
 		posWeight = 5;
 		negWeight = -3;
-		highThreshold = 220;
-		lowThreshold = 157;
+		highThreshold = 200;
+		lowThreshold = 142;
 
 		if (mode == "hsvchannels")
 		{
@@ -221,7 +228,11 @@ int main( int argc, char* argv[] )
 			{
 				int x = x1 + (int) (dirX * t);
 				int y = y1 + (int) (dirY * t);
-				imagePixelsQuad[x][y] = 255;
+				
+				if (x >= 0 && x < edgeImage->width && y >= 0 && y < edgeImage->height)
+				{
+					imagePixelsQuad[x][y] = 255;
+				}
 			}
 		}
 	}

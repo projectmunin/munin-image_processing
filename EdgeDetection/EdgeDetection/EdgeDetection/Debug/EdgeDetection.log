@@ -1,56 +1,8 @@
-﻿Build started 2014-04-01 00:02:50.
-     1>Project "D:\Desktop\munin-image_processing-canny-edge\EdgeDetection\EdgeDetection\EdgeDetection\EdgeDetection.vcxproj" on node 2 (Build target(s)).
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt cannyDetect.cpp cannyDetector.cpp EdgeDetection.cpp fileReader.cpp imgutil.cpp strutil.cpp templateDetection.cpp
-         templateDetection.cpp
-         strutil.cpp
-         imgutil.cpp
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\imgutil.cpp(124): warning C4244: '=' : conversion from 'double' to 'unsigned char', possible loss of data
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\imgutil.cpp(127): warning C4244: '=' : conversion from 'double' to 'unsigned char', possible loss of data
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\imgutil.cpp(130): warning C4244: '=' : conversion from 'double' to 'unsigned char', possible loss of data
-         fileReader.cpp
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\filereader.cpp(29): warning C4244: 'initializing' : conversion from 'std::streamoff' to 'unsigned int', possible loss of data
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\filereader.cpp(67): warning C4099: 'dirent' : type name first seen using 'struct' now seen using 'class'
-                 d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\dirent.h(256) : see declaration of 'dirent'
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\filereader.cpp(144): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\string.h(110) : see declaration of 'strcpy'
-         EdgeDetection.cpp
-         cannyDetector.cpp
-         cannyDetect.cpp
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(20): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(49): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(65): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(66): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(84): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(101): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(103): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(106): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(133): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(135): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(222): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(224): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(249): warning C4244: '=' : conversion from 'float' to 'int', possible loss of data
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(262): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(263): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(278): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(279): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(287): warning C4018: '<' : signed/unsigned mismatch
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(342): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(343): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
-     1>d:\desktop\munin-image_processing-canny-edge\edgedetection\edgedetection\edgedetection\cannydetect.cpp(418): warning C4018: '<' : signed/unsigned mismatch
-         Generating Code...
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Desktop\munin-image_processing-canny-edge\EdgeDetection\EdgeDetection\Debug\EdgeDetection.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\Desktop\munin-image_processing-canny-edge\EdgeDetection\EdgeDetection\Debug\EdgeDetection.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Desktop\munin-image_processing-canny-edge\EdgeDetection\EdgeDetection\Debug\EdgeDetection.lib" /MACHINE:X86 Debug\cannyDetect.obj
-         Debug\cannyDetector.obj
-         Debug\EdgeDetection.obj
-         Debug\fileReader.obj
-         Debug\imgutil.obj
-         Debug\strutil.obj
-         Debug\templateDetection.obj
-         LINK : D:\Desktop\munin-image_processing-canny-edge\EdgeDetection\EdgeDetection\Debug\EdgeDetection.exe not found or not built by the last incremental link; performing full link
-         EdgeDetection.vcxproj -> D:\Desktop\munin-image_processing-canny-edge\EdgeDetection\EdgeDetection\Debug\EdgeDetection.exe
-     1>Done Building Project "D:\Desktop\munin-image_processing-canny-edge\EdgeDetection\EdgeDetection\EdgeDetection\EdgeDetection.vcxproj" (Build target(s)).
-
-Build succeeded.
-
-Time Elapsed 00:00:03.39
+﻿  EdgeDetection.cpp
+d:\kandidatarbete\munin-image_processing\edgedetection\edgedetection\edgedetection\edgedetection.cpp(102): warning C4244: 'argument' : conversion from 'double' to 'unsigned char', possible loss of data
+d:\kandidatarbete\munin-image_processing\edgedetection\edgedetection\edgedetection\edgedetection.cpp(107): warning C4244: 'argument' : conversion from 'double' to 'unsigned char', possible loss of data
+d:\kandidatarbete\munin-image_processing\edgedetection\edgedetection\edgedetection\edgedetection.cpp(112): warning C4244: 'argument' : conversion from 'double' to 'unsigned char', possible loss of data
+d:\kandidatarbete\munin-image_processing\edgedetection\edgedetection\edgedetection\edgedetection.cpp(145): warning C4305: 'argument' : truncation from 'double' to 'float'
+d:\kandidatarbete\munin-image_processing\edgedetection\edgedetection\edgedetection\edgedetection.cpp(167): warning C4244: 'initializing' : conversion from 'double' to 'unsigned char', possible loss of data
+d:\kandidatarbete\munin-image_processing\edgedetection\edgedetection\edgedetection\edgedetection.cpp(188): warning C4244: 'initializing' : conversion from 'double' to 'unsigned char', possible loss of data
+  EdgeDetection.vcxproj -> D:\Kandidatarbete\munin-image_processing\EdgeDetection\EdgeDetection\Debug\EdgeDetection.exe
