@@ -9,8 +9,6 @@
 
 #include "fileReader.h"
 
-#include "EdgeGrouping.h"
-
 #include "templateDetection.h"
 
 #include "hough.h"

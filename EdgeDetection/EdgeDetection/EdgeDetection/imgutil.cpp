@@ -102,10 +102,10 @@ grayImage::grayImage(rgbImage *img, colorChannel channel)
 	this->height = img->height;
 	
 	this->pixel = new unsigned char*[this->width];
-	for(int i=0;i<width;i++)
+	for(int i=0;i<this->width;i++)
 	{
-		this->pixel[i] = new unsigned char[height];
-		for(int j=0;j<height;j++)
+		this->pixel[i] = new unsigned char[this->height];
+		for(int j=0;j<this->height;j++)
 		{
 			switch(channel)
 			{

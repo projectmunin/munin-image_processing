@@ -1,8 +1,0 @@
-﻿  EdgeDetection.cpp
-d:\kandidatarbete\munin-image_processing\edgedetection\edgedetection\edgedetection\edgedetection.cpp(102): warning C4244: 'argument' : conversion from 'double' to 'unsigned char', possible loss of data
-d:\kandidatarbete\munin-image_processing\edgedetection\edgedetection\edgedetection\edgedetection.cpp(107): warning C4244: 'argument' : conversion from 'double' to 'unsigned char', possible loss of data
-d:\kandidatarbete\munin-image_processing\edgedetection\edgedetection\edgedetection\edgedetection.cpp(112): warning C4244: 'argument' : conversion from 'double' to 'unsigned char', possible loss of data
-d:\kandidatarbete\munin-image_processing\edgedetection\edgedetection\edgedetection\edgedetection.cpp(145): warning C4305: 'argument' : truncation from 'double' to 'float'
-d:\kandidatarbete\munin-image_processing\edgedetection\edgedetection\edgedetection\edgedetection.cpp(167): warning C4244: 'initializing' : conversion from 'double' to 'unsigned char', possible loss of data
-d:\kandidatarbete\munin-image_processing\edgedetection\edgedetection\edgedetection\edgedetection.cpp(188): warning C4244: 'initializing' : conversion from 'double' to 'unsigned char', possible loss of data
-  EdgeDetection.vcxproj -> D:\Kandidatarbete\munin-image_processing\EdgeDetection\EdgeDetection\Debug\EdgeDetection.exe

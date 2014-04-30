@@ -22,7 +22,7 @@ quadrangle* identifyBlackboard(list<quadrangle*> *quads, int imageWidth, int ima
 	quadrangle* bestQuad = *(quads->begin());
 	double bestWeight = 0;
 	
-	for (auto iterator = quads->begin(); iterator != quads->end(); ++iterator)
+	for (list<quadrangle*>::iterator iterator = quads->begin(); iterator != quads->end(); ++iterator)
 	{
 		quadrangle *quad = *iterator;
 		
@@ -66,9 +66,7 @@ quadrangle* identifyBlackboard(list<quadrangle*> *quads, int imageWidth, int ima
 
 		double weight = weightOffsetX + weightOffsetY + weightRatio + weightSize;
 		double weight2 = weightOffsetX * weightOffsetY * weightRatio * weightSize;
-		printf("quad weights: weight = %e; weight2 = %e\nweightOffsetX = %e\nweightOffsetY = %e\nweightRatio = %e\nweightSize = %e\n", weight, weight2, weightOffsetX, weightOffsetY, weightRatio, weightSize);
-		printf("errorCenterX = % e\nerrorCenterY = %e\nerrorRatio = %e\nerrorSize = %e\n", errorCenterX, errorCenterY, errorRatio, errorSize);
-
+		
 		if (bestWeight < weight)
 		{
 			bestQuad = quad;

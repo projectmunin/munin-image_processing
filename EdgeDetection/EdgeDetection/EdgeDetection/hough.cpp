@@ -246,7 +246,7 @@ houghSpace* houghFiltering(houghSpace *originalHough, int threshold, int windowW
 	* holeTolerance
 		* the amount of holes the quadrangles edges may consist of, in percent
 */
-list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeimage, int horizontalDistance, double horizontalAngMargin, int perpendicularDistance, double perpendicularAngMargin, double holeTolerance, int continousHoleTolerance)
+list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeimage, int horizontalDistance, float horizontalAngMargin, int perpendicularDistance, float perpendicularAngMargin, double holeTolerance, int continousHoleTolerance)
 {
 	list<quadrangle*> *quadrangles = new list<quadrangle*>;
 
@@ -290,8 +290,8 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeim
 													// Possibly check if opposite line is left/right original, using edge-dir knowledge to know where it ought to be and ignore if wrong
 													// can prolly edit to limit the for loop to ensure this.
 
-													int *linesAng = new int[4];
-													int *linesRad = new int[4];
+													int linesAng[4];
+													int linesRad[4];
 
 													linesAng[0] = curAng;
 													linesAng[1] = curPerpendicularAng;
@@ -343,10 +343,8 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeim
 		}
 	}
 
-	printf("size0 = %i\n",quadrangles->size());
-
 	// get rid of quadrangles with too many holes, or too many holes in a row
-	auto iterator = quadrangles->begin();
+	list<quadrangle*>::iterator iterator = quadrangles->begin();
 	bool finishedIterating = false;
 	while (finishedIterating != true)
 	{
@@ -423,13 +421,14 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeim
 			if (quad->holePercentage > holeTolerance || quad->continousHoles > continousHoleTolerance)
 			{
 				quadrangles->erase(iterator);
+				delete quad;
 			}
 		}
 		else
 		{
 			if (quad->holePercentage > holeTolerance || quad->continousHoles > continousHoleTolerance)
 			{
-				auto nextIterator = next(iterator);
+				list<quadrangle*>::iterator nextIterator = next(iterator);
 				quadrangles->erase(iterator);
 				iterator = nextIterator;
 			}
@@ -439,8 +438,6 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeim
 			}
 		}
 	}
-
-	printf("size = %i\n",quadrangles->size());
 
 	return quadrangles;
 

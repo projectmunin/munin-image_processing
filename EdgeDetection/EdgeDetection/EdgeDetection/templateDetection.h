@@ -1,6 +1,8 @@
 #ifndef TEMPLATEDETECTION_H
 #define TEMPLATEDETECTION_H
 
+#define INT_MIN     (-20000) /* minimum (signed) int value */
+#define INT_MAX       20000    /* maximum (signed) int value */
 
 #include <math.h>
 #include <iostream>
