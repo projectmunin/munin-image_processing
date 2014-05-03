@@ -15,11 +15,11 @@
 
 #include "EdgeDetection.h"
 
-#include "cannyDetector.h"
+//#include "cannyDetector.h"
 
 int main( int argc, char* argv[] )
 {
-	//while (1) {
+	while (1) {
 	cout << "EdgeDetection: main started with " << argc << " arguments." << endl;
 
 	string imageName = "";
@@ -144,73 +144,70 @@ int main( int argc, char* argv[] )
 	cout << "creating hough-transform of image" << endl;
 	houghSpace *hough = houghTransform(edgeImage, 500, 0.35);
 	cout << "created hough-transform of image" << endl;
+	
 	cout << "Creating image of the hough-transform" << endl;
-	int **parameterSpace = hough->pixels;
 	double high = hough->highestValue;
-	unsigned char **houghPixels = new unsigned char*[hough->width];
-	for (int x = 0; x < hough->width; x++)
-	{
-		houghPixels[x] = new unsigned char[hough->height];
-		for (int y = 0; y < hough->height; y++)
-		{
-			houghPixels[x][y] = ((unsigned char) ((((double) parameterSpace[x][y]) / high) * 255));
-		}
-	}
-
 	rgb8 **imagePixels = new rgb8*[hough->width];
 	for(int x=0; x < hough->width; x++)
 	{
 		imagePixels[x] = new rgb8[hough->height];
 		for(int y=0; y < hough->height; y++)
 		{
-			unsigned char val = pow(houghPixels[x][y],1.0/8.0) * pow(255,7.0/8.0);
+			unsigned char val = pow( ((unsigned char) ((((double) hough->pixels[x][y]) / high) * 255)) ,1.0/8.0) * pow(255,7.0/8.0);
 			imagePixels[x][y].red = val;
 			imagePixels[x][y].green = val;
 			imagePixels[x][y].blue = val;
 		}
 	}
 	cout << "Created image of the hough-transform" << endl;
-	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/" + filename, new rgbImage(Input->date, hough->width, hough->height, imagePixels), fileType::PPM);
+	rgbImage *rgbHough = new rgbImage(Input->date, hough->width, hough->height, imagePixels);
+	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/" + filename, rgbHough, fileType::PPM);
 	cout << "Saved hough-image." << endl;
 
 	
 	cout << "filtering hough-image." << endl;
 	houghSpace* filteredHough = houghFiltering(hough, 400, 10, 50);
 	cout << "creating image from filtered hough-image." << endl;
-	unsigned char **imagePixels1 = new unsigned char*[filteredHough->width];
+	rgb8 **imagePixels1 = new rgb8*[filteredHough->width];
 	for(int x=0; x < filteredHough->width; x++)
 	{
-		imagePixels1[x] = new unsigned char[filteredHough->height];
+		imagePixels1[x] = new rgb8[filteredHough->height];
 		for(int y=0; y < filteredHough->height; y++)
 		{
 			unsigned char val = pow(((((double) filteredHough->pixels[x][y]) / high) * 255),1.0/8.0) * pow(255,7.0/8.0);
-			imagePixels1[x][y] = val;
+			imagePixels1[x][y].red = val;
+			imagePixels1[x][y].green = val;
+			imagePixels1[x][y].blue = val;
 		}
 	}
-	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/reconstructed/hough_" + filename, new rgbImage(Input->date, new grayImage(filteredHough->width, filteredHough->height, imagePixels1)), fileType::PPM);
+	rgbImage *rgbFiltered = new rgbImage(Input->date, filteredHough->width, filteredHough->height, imagePixels1);
+	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/reconstructed/hough_" + filename, rgbFiltered, fileType::PPM);
 	cout << "saved filtered hough-image." << endl;
 
 	cout << "reconstructing hough-image." << endl;
 	grayImage *reconstructedGrayImage = houghRecronstruction(Input->width, Input->height, filteredHough);
-	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/reconstructed/" + filename, new rgbImage(Input->date, reconstructedGrayImage), fileType::PPM);
+	rgbImage *reconstructedRgbImage = new rgbImage(Input->date, reconstructedGrayImage);
+	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/reconstructed/" + filename, reconstructedRgbImage, fileType::PPM);
 	cout << "Saved reconstructed image." << endl;
 
 	cout << "Identifying quadrangles" << endl;
-	list<quadrangle*>* quads = houghIdentifyQuadrangles(filteredHough, edgeImage, 100, 40, 100, 40, 0.5, 50);
+	list<quadrangle*> *quads = houghIdentifyQuadrangles(filteredHough, edgeImage, 100, 40, 100, 40, 0.5, 50);
 	cout << "Creating image for list of quadrangles" << endl;
-	unsigned char **imagePixelsQuad = new unsigned char*[edgeImage->width];
+	rgb8 **imagePixelsQuad = new rgb8 *[edgeImage->width];
 	for(int x=0; x < edgeImage->width; x++)
 	{
-		imagePixelsQuad[x] = new unsigned char[edgeImage->height];
+		imagePixelsQuad[x] = new rgb8[edgeImage->height];
 		for(int y=0; y < edgeImage->height; y++)
 		{
-			imagePixelsQuad[x][y] = 0;
+			imagePixelsQuad[x][y].red = 0;
+			imagePixelsQuad[x][y].green = 0;
+			imagePixelsQuad[x][y].blue = 0;
 		}
 	}
 	cout << "filling image from list of quadrangles" << endl;
 	for (list<quadrangle*>::iterator iterator = quads->begin(); iterator != quads->end(); ++iterator)
 	{
-		quadrangle *quad = *iterator;
+		quadrangle* quad = *iterator;
 		for (int i = 0; i < 4; i++)
 		{
 			int x1 = quad->cornersX[i];
@@ -227,13 +224,15 @@ int main( int argc, char* argv[] )
 				
 				if (x >= 0 && x < edgeImage->width && y >= 0 && y < edgeImage->height)
 				{
-					imagePixelsQuad[x][y] = 255;
+					imagePixelsQuad[x][y].red = 255;
+					imagePixelsQuad[x][y].green = 255;
+					imagePixelsQuad[x][y].blue = 255;
 				}
 			}
 		}
 	}
 	cout << "saving image of quadrangles" << endl;
-	rgbImage *quadImage = new rgbImage(Input->date, new grayImage(edgeImage->width, edgeImage->height, imagePixelsQuad));
+	rgbImage *quadImage = new rgbImage(Input->date, edgeImage->width, edgeImage->height, imagePixelsQuad);
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/quadrangles/" + filename, quadImage, fileType::PPM);
 	cout << "saved image of quadrangles" << endl;
 
@@ -241,20 +240,23 @@ int main( int argc, char* argv[] )
 	quadrangle* blackboard = identifyBlackboard(quads, edgeImage->width, edgeImage->height, edgeImage->width/2, 0, 1851, 3.5);
 	cout << "Identified blackboard-quad" << endl;
 	cout << "filling image with blackboard" << endl;
+	rgb8 **imagePixelsQuad1 = new rgb8 *[edgeImage->width];
 	for(int x=0; x < edgeImage->width; x++)
 	{
-		imagePixelsQuad[x] = new unsigned char[edgeImage->height];
+		imagePixelsQuad1[x] = new rgb8[edgeImage->height];
 		for(int y=0; y < edgeImage->height; y++)
 		{
-			imagePixelsQuad[x][y] = 0;
+			imagePixelsQuad1[x][y].red = 0;
+			imagePixelsQuad1[x][y].green = 0;
+			imagePixelsQuad1[x][y].blue = 0;
 		}
 	}
 	for (int i = 0; i < 4; i++)
 	{
-		int x1 = blackboard->cornersX[i];
-		int y1 = blackboard->cornersY[i];
-		int x2 = blackboard->cornersX[(i+1)%4];
-		int y2 = blackboard->cornersY[(i+1)%4];
+		int x1 = blackboard->cornersX.at(i);
+		int y1 = blackboard->cornersY.at(i);
+		int x2 = blackboard->cornersX.at((i+1)%4);
+		int y2 = blackboard->cornersY.at((i+1)%4);
 		double dirX = (double) x2 - (double) x1;
 		double dirY = (double) y2 - (double) y1;
 
@@ -262,25 +264,25 @@ int main( int argc, char* argv[] )
 		{
 			int x = x1 + (int) (dirX * t);
 			int y = y1 + (int) (dirY * t);
-			imagePixelsQuad[x][y] = 255;
+			imagePixelsQuad1[x][y].red = 255;
+			imagePixelsQuad1[x][y].green = 255;
+			imagePixelsQuad1[x][y].blue = 255;
 		}
 	}
 	cout << "saving image of quadrangles" << endl;
-	rgbImage *blackboardImage = new rgbImage(Input->date, new grayImage(edgeImage->width, edgeImage->height, imagePixelsQuad));
+	rgbImage *blackboardImage = new rgbImage(Input->date, edgeImage->width, edgeImage->height, imagePixelsQuad1);
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/quadrangles/blackboard_" + filename, blackboardImage, fileType::PPM);
 	cout << "saved image of quadrangles" << endl;
 	
-	for (int x = 0; x < hough->width; x++)
-	{
-		delete houghPixels[x];
-		delete imagePixels[x];
-		delete imagePixels1[x];
-		delete imagePixelsQuad[x];
-	}
-	delete houghPixels;
-	delete imagePixels;
-	delete imagePixels1;
-	delete imagePixelsQuad;
+	//for (int x = 0; x < hough->width; x++)
+	//{
+		//delete[] imagePixels[x];
+		//delete[] imagePixels1[x];
+		//delete[] imagePixelsQuad[x];
+	//}
+	//delete[] imagePixels;
+	//delete[] imagePixels1;
+	//delete[] imagePixelsQuad;
 
 	for (list<quadrangle*>::iterator iterator = quads->begin(); iterator != quads->end(); ++iterator)
 	{
@@ -288,18 +290,22 @@ int main( int argc, char* argv[] )
 	}
 	delete quads;
 
+	delete Input;
 	delete edgeImage;
 	delete colorEdgeImage;
 	delete hough;
+	delete rgbHough;
 	delete filteredHough;
+	delete rgbFiltered;
 	delete reconstructedGrayImage;
+	delete reconstructedRgbImage;
 	delete quadImage;
-	//delete blackboard;
+	delete blackboard;
 	delete blackboardImage;
 
 	//system("pause");
 
-	//}
+	}
 	return 0;
 
 }

@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <list>
+#include <vector>
 
 
 #include "imgutil.h"
@@ -19,10 +20,10 @@ public:
 	int width;
 	int height;
 	int highestValue;
-	int **pixels;
+	vector<vector<int>> pixels;
 	
 	houghSpace(houghSpace *hough);
-	houghSpace(int width, int height, int highestValue, int **pixels);
+	houghSpace(int width, int height, int highestValue, vector<vector<int>> pixels);
 	~houghSpace();
 };
 
@@ -30,14 +31,14 @@ public:
 class quadrangle
 {
 public:
-	int *cornersX;
-	int *cornersY;
+	vector<int> cornersX;
+	vector<int> cornersY;
 	int holes;
 	int continousHoles;
 	int pixelsCovered;
 	double holePercentage;
 
-	quadrangle(int *linesAng, int *linesRad);
+	quadrangle(vector<int> cornersX, vector<int> cornersY);
 	~quadrangle();
 };
 

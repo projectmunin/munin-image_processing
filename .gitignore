@@ -43,3 +43,5 @@
 *.ppm
 *.rgb
 *.vcxproj.user
+*.psess
+*.vspx

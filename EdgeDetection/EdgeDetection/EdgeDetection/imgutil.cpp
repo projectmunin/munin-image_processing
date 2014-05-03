@@ -66,9 +66,9 @@ rgbImage::~rgbImage()
 	cout << "destructing rgbimage" << endl;
 	for(int i=0;i<width;i++)
 	{
-		delete pixel[i];
+		delete[] pixel[i];
 	}
-	delete pixel;
+	delete[] pixel;
 }
 
 
@@ -159,9 +159,9 @@ grayImage::~grayImage()
 	cout << "destructing grayimage" << endl;
 	for(int i=0;i<width;i++)
 	{
-		delete pixel[i];
+		delete[] pixel[i];
 	}
-	delete pixel;
+	delete[] pixel;
 }
 
 hsvImage::hsvImage(rgbImage *img)
@@ -195,9 +195,9 @@ hsvImage::~hsvImage()
 	cout << "destructing hsvimage" << endl;
 	for(int i=0;i<width;i++)
 	{
-		delete pixel[i];
+		delete[] pixel[i];
 	}
-	delete pixel;
+	delete[] pixel;
 }
 
 
@@ -244,11 +244,11 @@ edgeImage::~edgeImage()
 	cout << "destructing edgeimage" << endl;
 	for(int i=0;i<width;i++)
 	{
-		delete pixel[i];
-		delete angle[i];
+		delete[] pixel[i];
+		delete[] angle[i];
 	}
-	delete pixel;
-	delete angle;
+	delete[] pixel;
+	delete[] angle;
 }
 
 
@@ -437,7 +437,7 @@ void embed(grayImage *img, int radius)
 	int height = img->height+radius*2;
 
 	unsigned char **pixel = new unsigned char*[width];
-	for(int x=0; x < width; x++)
+	for(x=0; x < width; x++)
 	{
 		pixel[x] = new unsigned char[height];
 		for (y=0; y < height; y++)
@@ -453,8 +453,11 @@ void embed(grayImage *img, int radius)
 		}
 	}
 
-
-	delete img->pixel;
+	for(x=0; x < img->width; x++)
+	{
+		delete[] img->pixel[x];
+	}
+	delete[] img->pixel;
 
 	img->width = width;
 	img->height= height;
@@ -470,7 +473,7 @@ void debed(grayImage *img, int radius)
 	int height = img->height-radius*2;
 
 	unsigned char **pixel = new unsigned char*[width];
-	for(int x=0; x < width; x++)
+	for(x=0; x < width; x++)
 	{
 		pixel[x] = new unsigned char[height];
 		for (y=0; y < height; y++)
@@ -479,8 +482,12 @@ void debed(grayImage *img, int radius)
 		}
 	}
 
-
-	delete img->pixel;
+	
+	for(x=0; x < img->width; x++)
+	{
+		delete[] img->pixel[x];
+	}
+	delete[] img->pixel;
 
 	img->width = width;
 	img->height= height;

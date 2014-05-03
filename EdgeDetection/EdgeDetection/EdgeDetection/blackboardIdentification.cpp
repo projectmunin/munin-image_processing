@@ -17,9 +17,9 @@
 #include "hough.h"
 
 
-quadrangle* identifyBlackboard(list<quadrangle*> *quads, int imageWidth, int imageHeight, int idealCenterX, int idealCenterY, int idealSize, double idealRatio)
+quadrangle* identifyBlackboard(list<quadrangle*>* quads, int imageWidth, int imageHeight, int idealCenterX, int idealCenterY, int idealSize, double idealRatio)
 {
-	quadrangle* bestQuad = *(quads->begin());
+	list<quadrangle*>::iterator bestQuad = quads->begin();
 	double bestWeight = 0;
 	
 	for (list<quadrangle*>::iterator iterator = quads->begin(); iterator != quads->end(); ++iterator)
@@ -27,15 +27,15 @@ quadrangle* identifyBlackboard(list<quadrangle*> *quads, int imageWidth, int ima
 		quadrangle *quad = *iterator;
 		
 		/// Get all corners;
-		int x0 = quad->cornersX[0];
-		int x1 = quad->cornersX[1];
-		int x2 = quad->cornersX[2];
-		int x3 = quad->cornersX[3];
+		int x0 = quad->cornersX.at(0);
+		int x1 = quad->cornersX.at(1);
+		int x2 = quad->cornersX.at(2);
+		int x3 = quad->cornersX.at(3);
 
-		int y0 = quad->cornersY[0];
-		int y1 = quad->cornersY[1];
-		int y2 = quad->cornersY[2];
-		int y3 = quad->cornersY[3];
+		int y0 = quad->cornersY.at(0);
+		int y1 = quad->cornersY.at(1);
+		int y2 = quad->cornersY.at(2);
+		int y3 = quad->cornersY.at(3);
 		
 
 		/// The 'center of mass' for the quad (aka center because the absence of mass).
@@ -69,11 +69,14 @@ quadrangle* identifyBlackboard(list<quadrangle*> *quads, int imageWidth, int ima
 		
 		if (bestWeight < weight)
 		{
-			bestQuad = quad;
+			bestQuad = iterator;
 			bestWeight = weight;
 		}
 	}
 
-	return bestQuad;
+	quadrangle* returnQuad = *bestQuad;
+	quads->erase(bestQuad);
+
+	return returnQuad;
 
 }

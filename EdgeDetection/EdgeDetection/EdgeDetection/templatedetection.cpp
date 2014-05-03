@@ -45,9 +45,9 @@ weightTemplate::~weightTemplate()
 {
 	for(int i=0;i<3;i++)
 	{
-		delete weights[i];
+		delete[] weights[i];
 	}
-	delete weights;
+	delete[] weights;
 }
 
 
@@ -110,6 +110,7 @@ weightTemplate** createTemplates(char posWeight, char negWeight)
 }
 
 
+/*
 grayImage* templateContrastImage(grayImage* imageData, char posWeight, char negWeight)
 {
 
@@ -202,6 +203,7 @@ grayImage* templateContrastImage(grayImage* imageData, char posWeight, char negW
 	return returnImage;
 
 }
+*/
 
 
 edgeImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeight, unsigned char highThreshold, unsigned char lowThreshold)
@@ -216,25 +218,32 @@ edgeImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeigh
 	unsigned char **pixelData = imageData->pixel;
 
 	/// The contrast image.
-	int **contrastPixels = new int*[width];
-	unsigned char **edgePixels = new unsigned char*[width];
-	float **edgeAngles = new float*[width];
-	bool **lockedEdges = new bool*[width];
-	bool **lowEdges = new bool*[width];
+	vector<vector<int>> contrastPixels;
+	vector<vector<unsigned char>> edgePixels;
+	vector<vector<float>> edgeAngles;
+	vector<vector<bool>> lockedEdges;
+	vector<vector<bool>> lowEdges;
+	contrastPixels.resize(width);
+	edgePixels.resize(width);
+	edgeAngles.resize(width);
+	lockedEdges.resize(width);
+	lowEdges.resize(width);
 	for(int x=0; x < width; x++)
 	{
-		contrastPixels[x] = new int[height];
-		edgePixels[x] = new unsigned char[height];
-		edgeAngles[x] = new float[height];
-		lockedEdges[x] = new bool[height];
-		lowEdges[x] = new bool[height];
+		contrastPixels[x].resize(height,CONTRAST_MIN);
+		edgePixels[x].resize(height,0);
+		edgeAngles[x].resize(height,0);
+		lockedEdges[x].resize(height,false);
+		lowEdges[x].resize(height,false);
+		/*
 		for(int y=0; y < height; y++)
 		{
-			contrastPixels[x][y] = INT_MIN;
+			contrastPixels[x][y] = CONTRAST_MIN;
 			edgeAngles[x][y] = 0;
 			lockedEdges[x][y] = false;
 			lowEdges[x][y] = false;
 		}
+		*/
 	}
 
 	queue<int> openEdges;
@@ -243,8 +252,8 @@ edgeImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeigh
 
 	float templateAngles[] = {135.0, 90.0, 45.0, 0.0, 315.0, 270.0, 225.0, 180.0};
 
-	int lowestEdge = INT_MAX;
-	int highestEdge = INT_MIN;
+	int lowestEdge = CONTRAST_MAX;
+	int highestEdge = CONTRAST_MIN;
 	for (int x = 1; x < width-1; x++)
 	{
 		for (int y = 1; y < height-1; y++)
@@ -275,7 +284,7 @@ edgeImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeigh
 			}
 			edgeAngles[x][y] = edgeAngles[x][y] / (float) totalResponse;
 		}
-
+		
 	}
 
 	cout << "mapped contrasts" << endl;
@@ -286,7 +295,7 @@ edgeImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeigh
 		for (int y = 0; y < height; y++)
 		{
 			unsigned char pixel;
-			if (contrastPixels[x][y] == INT_MIN)
+			if (contrastPixels[x][y] == CONTRAST_MIN)
 			{
 				pixel = 0;
 			}
@@ -348,11 +357,19 @@ edgeImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeigh
 
 	cout << "mapped confirmed edges" << endl;
 
-	edgeImage *returnImage = new edgeImage(width, height, edgePixels, edgeAngles);
-
+	edgeImage *returnImage = new edgeImage(width, height);
+	for (int x = 1; x < width-1; x++)
+	{
+		for (int y = 1; y < height-1; y++)
+		{	
+			returnImage->pixel[x][y] = edgePixels.at(x).at(y);
+			returnImage->angle[x][y] = edgeAngles.at(x).at(y);
+		}
+	}
 	cout << "created edgeimage" << endl;
 
 	/// Garbage Collection
+	/*
 	for(int i = 0; i < width; i++)
 	{
 		delete contrastPixels[i];
@@ -362,12 +379,13 @@ edgeImage* templateEdgeImage(grayImage *imageData, char posWeight, char negWeigh
 	delete contrastPixels;
 	delete lockedEdges;
 	delete lowEdges;
-
+	*/
 
 	for (int k=0; k<8; k++)
 	{
 		delete allTemplates[k];
 	}
+	delete[] allTemplates;
 
 	cout << "collected garbage" << endl;
 

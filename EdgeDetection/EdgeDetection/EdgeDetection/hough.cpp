@@ -23,18 +23,18 @@ houghSpace::houghSpace(houghSpace *hough)
 	this->height = hough->height;
 	this->highestValue = hough->highestValue;
 	
-	this->pixels = new int*[this->width];
+	this->pixels.resize(this->width);
 	for (int x = 0; x < this->width; x++)
 	{
-		this->pixels[x] = new int[this->height];
+		this->pixels[x].resize(this->height);
 		for (int y = 0; y < this->height; y++)
 		{
-			this->pixels[x][y] = hough->pixels[x][y];
+			this->pixels.at(x).at(y) = hough->pixels.at(x).at(y);
 		}
 	}
 }
 
-houghSpace::houghSpace(int width, int height, int highestValue, int **pixels)
+houghSpace::houghSpace(int width, int height, int highestValue, vector<vector<int>> pixels)
 {
 	this->width = width;
 	this->height = height;
@@ -44,18 +44,20 @@ houghSpace::houghSpace(int width, int height, int highestValue, int **pixels)
 
 houghSpace::~houghSpace()
 {
-	cout << "destructiong houghspace" << endl;
+	cout << "destructing houghspace" << endl;
 	
+	/*
 	for (int x = 0; x < width; x++)
 	{
 		delete pixels[x];
 	}
 	delete pixels;
+	*/
 }
 
 
 
-quadrangle::quadrangle(int *cornersX, int *cornersY)
+quadrangle::quadrangle(vector<int> cornersX, vector<int> cornersY)
 {
 	
 	this->cornersX = cornersX;
@@ -71,17 +73,18 @@ quadrangle::quadrangle(int *cornersX, int *cornersY)
 
 quadrangle::~quadrangle()
 {
-	cout << "destructiong quadrangle" << endl;
+	cout << "destructing quadrangle" << endl;
 
-	delete cornersX;
-	delete cornersY;
+	//delete cornersX;
+	//delete cornersY;
 }
 
 
 
 houghSpace* houghTransform(edgeImage* edgeimage, int angleResolution, float angleMargin)
 {
-	
+	register int x, y, ang;
+
 	int width = edgeimage->width;
 	int height = edgeimage->height;
 
@@ -90,33 +93,31 @@ houghSpace* houghTransform(edgeImage* edgeimage, int angleResolution, float angl
 
 	/// initialize the parameter-space
 	printf("Initializing parameter-space with resolution: angle: %i; radius: %i\n", angleResolution, maxRadius);
-	int **parameterSpace = new int*[angleResolution];
-	register int x, y;
+	vector<vector<int>> parameterSpace;
+	parameterSpace.resize(angleResolution);
 	for (x = 0; x < angleResolution; x++)
 	{
-		parameterSpace[x] = new int[maxRadius];
-		for (y = 0; y < maxRadius; y++)
-		{
-			parameterSpace[x][y] = 0;
-		}
+		parameterSpace[x].resize(maxRadius, 0);
 	}
 	cout << "Initialized parameter-space" << endl;
 
 	/// Perform the hough transform
 	cout << "Performing hough-transform" << endl;
-	// If we use out own edgeimage class, maybe make it have an ordered list of edge-pixels?
-	// Would remove the need to go through every pixel using an if-statement checking val != 0
+	
+	int halfWidth = width/2;
+	int halfHeight = height/2;
 	int highestValue = 0;
 	unsigned char **edgedata = edgeimage->pixel;
 	float **edgeAngles = edgeimage->angle;
-	register int ang;
-	for (int x = -width/2; x < width/2; x++)
+	for (int x = 0; x < width; x++)
 	{
-		for (int y = -height/2; y < height/2; y++)
+		for (int y = 0; y < height; y++)
 		{
-			if (edgedata[x+width/2][y+height/2] != 0)
+			if (edgedata[x][y] != 0)
 			{
-				int angle = edgeAngles[x+width/2][y+height/2] * ((double) angleResolution) / 360.0;//(2.0 * PI);
+				int realX = x-halfWidth;
+				int realY = y-halfHeight;
+				int angle = edgeAngles[x][y] * ((double) angleResolution) / 360.0;//(2.0 * PI);
 				int margin = angleResolution * angleMargin;
 				for (ang = angle - margin; ang < angle + margin; ang++)
 				{
@@ -125,10 +126,10 @@ houghSpace* houghTransform(edgeImage* edgeimage, int angleResolution, float angl
 						double degrees = ((double) ang) * 2.0 * PI / (double) angleResolution;
 						double cosVal = cos(degrees);
 						double sinVal = sin(degrees);
-						int rad = x*cosVal+y*sinVal + maxRadius/2; // TODO: calculate the sin and cos values once beforehand, rather than once per pixel.
-						int val = parameterSpace[ang][rad] + 1;
+						int rad = realX*cosVal+realY*sinVal + maxRadius/2; // TODO: calculate the sin and cos values once beforehand, rather than once per pixel.
+						int val = parameterSpace.at(ang).at(rad) + 1;
 
-						parameterSpace[ang][rad] = val;
+						parameterSpace.at(ang).at(rad) = val;
 
 						if (highestValue < val)
 						{
@@ -139,6 +140,7 @@ houghSpace* houghTransform(edgeImage* edgeimage, int angleResolution, float angl
 			}
 		}
 	}
+	
 	cout << "hough-transformed image into parameter space" << endl;
 
 	houghSpace *hough = new houghSpace(angleResolution, maxRadius, highestValue, parameterSpace);
@@ -154,13 +156,12 @@ houghSpace* houghFiltering(houghSpace *originalHough, int threshold, int windowW
 
 	houghSpace *hough = new houghSpace(originalHough);
 
-	int **houghPixels = hough->pixels;
 	register int ang, rad;
 	for (ang = 0; ang < hough->width; ang++)
 	{
 		for (rad = 0; rad < hough->height; rad++)
 		{
-			int curVal = houghPixels[ang][rad];
+			int curVal = hough->pixels[ang][rad];
 			if (curVal > threshold)
 			{
 				bool localMax = true;
@@ -175,7 +176,7 @@ houghSpace* houghFiltering(houghSpace *originalHough, int threshold, int windowW
 						int testRad = windowY + n;
 						if (testAng >= 0 && testAng < hough->width && testRad >= 0 && testRad < hough->height)
 						{
-							int testVal = houghPixels[testAng][testRad];
+							int testVal = hough->pixels[testAng][testRad];
 							if (curVal <= testVal)
 							{
 								if (testAng != ang || testRad != rad)
@@ -185,11 +186,11 @@ houghSpace* houghFiltering(houghSpace *originalHough, int threshold, int windowW
 									{
 										if (testAng <= ang && testRad <= rad)
 										{
-											houghPixels[testAng][testRad] = 0;
+											hough->pixels[testAng][testRad] = 0;
 										}
 										else
 										{
-											houghPixels[testAng][testRad] = testVal - 1;
+											hough->pixels[testAng][testRad] = testVal - 1;
 										}
 									}
 									else
@@ -203,12 +204,12 @@ houghSpace* houghFiltering(houghSpace *originalHough, int threshold, int windowW
 				}
 				if (localMax != true)
 				{
-					houghPixels[ang][rad] = 0;
+					hough->pixels[ang][rad] = 0;
 				}
 			}
 			else
 			{
-				houghPixels[ang][rad] = 0;
+				hough->pixels[ang][rad] = 0;
 			}
 		}
 	}
@@ -248,7 +249,7 @@ houghSpace* houghFiltering(houghSpace *originalHough, int threshold, int windowW
 */
 list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeimage, int horizontalDistance, float horizontalAngMargin, int perpendicularDistance, float perpendicularAngMargin, double holeTolerance, int continousHoleTolerance)
 {
-	list<quadrangle*> *quadrangles = new list<quadrangle*>;
+	list<quadrangle*>* quadrangles = new list<quadrangle*>;
 
 	// Find all permutations of sets of 4 lines perpendicular to its neighbours and opposite to the other
 	int horizontalAng = hough->width*0.5;
@@ -304,8 +305,10 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeim
 													linesRad[3] = perpendicularOppositeRad;
 
 													// find all corners created by intersections from the lines
-													int *cornersX = new int[4];
-													int *cornersY = new int[4];
+													vector<int> cornersX;
+													vector<int> cornersY;
+													cornersX.resize(4);
+													cornersY.resize(4);
 													for (int line = 0; line < 4; line++)
 													{
 														/// first line
@@ -321,8 +324,8 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeim
 														int xCorner = edgeimage->width/2 + (rad*sin(ang2) - rad2*sin(ang)) / (cos(ang)*sin(ang2) - cos(ang2)*sin(ang));
 														int yCorner = edgeimage->height/2 + (rad2*cos(ang) - rad*cos(ang2)) / (sin(ang2)*cos(ang) - sin(ang)*cos(ang2));
 
-														cornersX[line] = xCorner;
-														cornersY[line] = yCorner;
+														cornersX.at(line) = xCorner;
+														cornersY.at(line) = yCorner;
 													}
 
 													quadrangle *quad = new quadrangle(cornersX,cornersY);
@@ -348,16 +351,16 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeim
 	bool finishedIterating = false;
 	while (finishedIterating != true)
 	{
-		quadrangle *quad = *iterator;
+		quadrangle* quad = *iterator;
 
 		for (char i = 0; i < 4; i++)
 		{
-			int x = quad->cornersX[i];
-			int y = quad->cornersY[i];
+			int x = quad->cornersX.at(i);
+			int y = quad->cornersY.at(i);
 			
 			char i2 = (i+1)%4;
-			int x2 = quad->cornersX[i2];
-			int y2 = quad->cornersY[i2];
+			int x2 = quad->cornersX.at(i2);
+			int y2 = quad->cornersY.at(i2);
 
 			if ( (x >= 0 && x < edgeimage->width && y >= 0 && y < edgeimage->height)
 					|| (x2 >= 0 && x2 < edgeimage->width && y2 >= 0 && y2 < edgeimage->height))
@@ -430,6 +433,7 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeim
 			{
 				list<quadrangle*>::iterator nextIterator = next(iterator);
 				quadrangles->erase(iterator);
+				delete quad;
 				iterator = nextIterator;
 			}
 			else
@@ -451,7 +455,7 @@ grayImage* houghRecronstruction(int width, int height, houghSpace *hough)
 	/// Calculate required maximum radius offset (diagonally from center to a corner)
 	int maxRadius =  hough->height;
 
-	int **houghPixels = hough->pixels;
+	vector<vector<int>> houghPixels = hough->pixels;
 	register int ang, rad;
 	register int x;
 	for (ang = 0; ang < hough->width; ang++)

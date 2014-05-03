@@ -1,13 +1,15 @@
 #ifndef TEMPLATEDETECTION_H
 #define TEMPLATEDETECTION_H
 
-#define INT_MIN     (-20000) /* minimum (signed) int value */
-#define INT_MAX       20000    /* maximum (signed) int value */
+#define CONTRAST_MIN	(-20000) /* minimum (signed) int value */
+#define CONTRAST_MAX	20000    /* maximum (signed) int value */
+#define NOLL			0		/*  */
 
 #include <math.h>
 #include <iostream>
 #include <string>
 #include <queue>
+#include <vector>
 #include <stdio.h>
 
 #include "imgutil.h"
