@@ -19,7 +19,7 @@
 
 int main( int argc, char* argv[] )
 {
-	while (1) {
+	//while (1) {
 	cout << "EdgeDetection: main started with " << argc << " arguments." << endl;
 
 	string imageName = "";
@@ -38,8 +38,8 @@ int main( int argc, char* argv[] )
 
 		cout << "EdgeDetection: no arguments, using hardcoded 'input'" << endl;
 
-		//imageName = "2014_02_11-17_45-15-w2592h1936.rgb";
-		//imageName = "2014_02_18-13_32-21-w2592h1936.rgb";
+		//imageName = "2014_02_11-17_45-15-w2592h1936.rgb"; // spotify
+		//imageName = "2014_02_18-13_32-21-w2592h1936.rgb"; // fibe
 		//imageName = "2014_02_20-16_38-21-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-22-w2592h1936.rgb";
 		//imageName = "2014_02_20-16_38-23-w2592h1936.rgb";
@@ -191,7 +191,7 @@ int main( int argc, char* argv[] )
 	cout << "Saved reconstructed image." << endl;
 
 	cout << "Identifying quadrangles" << endl;
-	list<quadrangle*> *quads = houghIdentifyQuadrangles(filteredHough, edgeImage, 100, 40, 100, 40, 0.5, 50);
+	list<quadrangle*> *quads = houghIdentifyQuadrangles(filteredHough, edgeImage, 100, 40, 100, 40, 0.5, 100);//0.5, 100);
 	cout << "Creating image for list of quadrangles" << endl;
 	rgb8 **imagePixelsQuad = new rgb8 *[edgeImage->width];
 	for(int x=0; x < edgeImage->width; x++)
@@ -216,8 +216,10 @@ int main( int argc, char* argv[] )
 			int y2 = quad->cornersY[(i+1)%4];
 			double dirX = (double) x2 - (double) x1;
 			double dirY = (double) y2 - (double) y1;
+			double length = sqrt(pow(dirX,2) + pow(dirY,2));
+			double stepLength = 1/length;
 
-			for (double t = 0; t <= 1; t+=0.0001)
+			for (double t = 0; t <= 1; t+=stepLength)
 			{
 				int x = x1 + (int) (dirX * t);
 				int y = y1 + (int) (dirY * t);
@@ -269,10 +271,10 @@ int main( int argc, char* argv[] )
 			imagePixelsQuad1[x][y].blue = 255;
 		}
 	}
-	cout << "saving image of quadrangles" << endl;
+	cout << "saving image of blackboard" << endl;
 	rgbImage *blackboardImage = new rgbImage(Input->date, edgeImage->width, edgeImage->height, imagePixelsQuad1);
 	writeImagePPM("Output/" + algorithm + "/" + mode + "/hough/quadrangles/blackboard_" + filename, blackboardImage, fileType::PPM);
-	cout << "saved image of quadrangles" << endl;
+	cout << "saved image of blackboard" << endl;
 	
 	//for (int x = 0; x < hough->width; x++)
 	//{
@@ -305,7 +307,7 @@ int main( int argc, char* argv[] )
 
 	//system("pause");
 
-	}
+	//}
 	return 0;
 
 }

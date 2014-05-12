@@ -107,6 +107,14 @@ houghSpace* houghTransform(edgeImage* edgeimage, int angleResolution, float angl
 	int halfWidth = width/2;
 	int halfHeight = height/2;
 	int highestValue = 0;
+	double *cosVals = new double[angleResolution];
+	double *sinVals = new double[angleResolution];;
+	for (ang = 0; ang < angleResolution; ang++)
+	{
+		double degrees = ((double) ang) * 2.0 * PI / (double) angleResolution;
+		cosVals[ang] = cos(degrees);
+		sinVals[ang] = sin(degrees);
+	}
 	unsigned char **edgedata = edgeimage->pixel;
 	float **edgeAngles = edgeimage->angle;
 	for (int x = 0; x < width; x++)
@@ -124,8 +132,8 @@ houghSpace* houghTransform(edgeImage* edgeimage, int angleResolution, float angl
 					if (ang >= 0 && ang < angleResolution)
 					{
 						double degrees = ((double) ang) * 2.0 * PI / (double) angleResolution;
-						double cosVal = cos(degrees);
-						double sinVal = sin(degrees);
+						double cosVal = cosVals[ang];//cos(degrees);
+						double sinVal = sinVals[ang];//sin(degrees);
 						int rad = realX*cosVal+realY*sinVal + maxRadius/2; // TODO: calculate the sin and cos values once beforehand, rather than once per pixel.
 						int val = parameterSpace.at(ang).at(rad) + 1;
 
@@ -140,7 +148,9 @@ houghSpace* houghTransform(edgeImage* edgeimage, int angleResolution, float angl
 			}
 		}
 	}
-	
+	delete[] cosVals;
+	delete[] sinVals;
+
 	cout << "hough-transformed image into parameter space" << endl;
 
 	houghSpace *hough = new houghSpace(angleResolution, maxRadius, highestValue, parameterSpace);
@@ -161,7 +171,7 @@ houghSpace* houghFiltering(houghSpace *originalHough, int threshold, int windowW
 	{
 		for (rad = 0; rad < hough->height; rad++)
 		{
-			int curVal = hough->pixels[ang][rad];
+			int curVal = hough->pixels.at(ang).at(rad);
 			if (curVal > threshold)
 			{
 				bool localMax = true;
@@ -176,7 +186,7 @@ houghSpace* houghFiltering(houghSpace *originalHough, int threshold, int windowW
 						int testRad = windowY + n;
 						if (testAng >= 0 && testAng < hough->width && testRad >= 0 && testRad < hough->height)
 						{
-							int testVal = hough->pixels[testAng][testRad];
+							int testVal = hough->pixels.at(testAng).at(testRad);
 							if (curVal <= testVal)
 							{
 								if (testAng != ang || testRad != rad)
@@ -186,11 +196,11 @@ houghSpace* houghFiltering(houghSpace *originalHough, int threshold, int windowW
 									{
 										if (testAng <= ang && testRad <= rad)
 										{
-											hough->pixels[testAng][testRad] = 0;
+											hough->pixels.at(testAng).at(testRad) = 0;
 										}
 										else
 										{
-											hough->pixels[testAng][testRad] = testVal - 1;
+											hough->pixels.at(testAng).at(testRad) = testVal - 1;
 										}
 									}
 									else
@@ -204,12 +214,12 @@ houghSpace* houghFiltering(houghSpace *originalHough, int threshold, int windowW
 				}
 				if (localMax != true)
 				{
-					hough->pixels[ang][rad] = 0;
+					hough->pixels.at(ang).at(rad) = 0;
 				}
 			}
 			else
 			{
-				hough->pixels[ang][rad] = 0;
+				hough->pixels.at(ang).at(rad) = 0;
 			}
 		}
 	}
@@ -363,14 +373,12 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeim
 			int y2 = quad->cornersY.at(i2);
 
 			if ( (x >= 0 && x < edgeimage->width && y >= 0 && y < edgeimage->height)
-					|| (x2 >= 0 && x2 < edgeimage->width && y2 >= 0 && y2 < edgeimage->height))
+					&& (x2 >= 0 && x2 < edgeimage->width && y2 >= 0 && y2 < edgeimage->height))
 			{
 
-				int xError = (int)x2 - (int)x;
-				int yError = (int)y2 - (int)y;
+				double xError = (int)x2 - (int)x;
+				double yError = (int)y2 - (int)y;
 				double length = sqrt(pow(xError,2) + pow(yError,2));
-				double xDir = xError / length;
-				double yDir = yError / length;
 
 				int curX;
 				int curY;
@@ -378,26 +386,29 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeim
 				int lastCurY = NULL;
 				int continousHoles = 0;
 				double t = 0;
-				while ((curX = x + t*xDir) != x2 && (curY = y + t*yDir) != y2)
+				double stepLength = 1/length;
+				while (t <= 1 && quad->continousHoles <= continousHoleTolerance)
 				{
-					t = t + 0.1;
+					curX = x + (int) (t*xError);
+					curY = y + (int) (t*yError);
+					t = t + stepLength;
 
 					if (curX != lastCurX || curY != lastCurY)
 					{
 						quad->pixelsCovered++;
-
-						if (edgeimage->pixel[curX,curY] == 0)
+						if (edgeimage->pixel[curX-1][curY] != 0 || edgeimage->pixel[curX][curY] != 0 || edgeimage->pixel[curX+1][curY] != 0
+								|| edgeimage->pixel[curX][curY-1] != 0 || edgeimage->pixel[curX][curY] != 0 || edgeimage->pixel[curX][curY+1] != 0)
 						{
-							quad->holes++;
+							continousHoles = 0;
+						}
+						else
+						{
+							quad->holes++; // Could be improved with a holePercentage for each line, but due to time-constraints I would rather not implement that right now.
 							continousHoles++;
 							if (continousHoles > quad->continousHoles)
 							{
 								quad->continousHoles = continousHoles;
 							}
-						}
-						else
-						{
-							continousHoles = 0;
 						}
 
 						lastCurX = curX;
@@ -405,6 +416,11 @@ list<quadrangle*>* houghIdentifyQuadrangles(houghSpace *hough, edgeImage *edgeim
 					}
 
 				}
+			}
+			else
+			{
+				/// Since a corner was outside edgeimage, quadrangle is invalid
+				quad->continousHoles = continousHoleTolerance + 1; // hacky way to ensure quadrangle gets deleted. 
 			}
 		}
 
