@@ -1,5 +1,8 @@
 # Ignore images too!
-*.png
+# Computer broke, fast way to get all images back in my orbit
+#*.png 
+#*.ppm
+#*.rgb
 
 # Compiled Object files
 *.slo
@@ -40,8 +43,6 @@
 *.idb
 *.log
 *.ilk
-*.ppm
-*.rgb
 *.vcxproj.user
 *.psess
 *.vspx
