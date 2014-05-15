@@ -456,12 +456,9 @@ edgeImage* templateDetectRGBChannels(rgbImage *colorImage, char posWeight, char 
 
 	cout << "created edgeimages for each grayscale image" << endl;
 
-	unsigned char **edgePixels = new unsigned char*[width];
-	float **edgeAngles = new float*[width];
+	edgeImage *edgeImg = new edgeImage(width, height);
 	for(int x=0; x < width; x++)
 	{
-		edgePixels[x] = new unsigned char[height];
-		edgeAngles[x] = new float[height];
 		for(int y=0; y < height; y++)
 		{
 			unsigned char pixel = ( ((int) redEdgeImage->pixel[x][y]) + ((int) greenEdgeImage->pixel[x][y])
@@ -485,12 +482,10 @@ edgeImage* templateDetectRGBChannels(rgbImage *colorImage, char posWeight, char 
 				angle = greenEdgeImage->angle[x][y];
 			}
 
-			edgePixels[x][y] = pixel;
-			edgeAngles[x][y] = angle;
+			edgeImg->pixel[x][y] = pixel;
+			edgeImg->angle[x][y] = angle;
 		}
 	}
-
-	edgeImage *edgeImg = new edgeImage(width, height, edgePixels, edgeAngles);
 
 	cout << "created an edgeimage merged from the grayscale edgeimages" << endl;
 

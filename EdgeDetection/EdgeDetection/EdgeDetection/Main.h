@@ -1,6 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <omp.h>
 #include <iostream>
 #include <string>
 #include <stdio.h>

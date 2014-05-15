@@ -11,7 +11,7 @@
 *****                                                                                          *****
 ***************************************************************************************************/
 
-
+/*
 
 #include "EdgeDetection.h"
 
@@ -135,7 +135,7 @@ int main( int argc, char* argv[] )
 				+ ")_b" + to_string(newb)
 				+ "_ratio" + to_string(newratio);
 	}*/
-
+	/*
 
 	// Spara edge filerna i ett sorterat sätt så man vet vilken som är vilken
 	rgbImage *colorEdgeImage = new rgbImage(Input->date, edgeImage);
@@ -312,3 +312,4 @@ int main( int argc, char* argv[] )
 
 }
 
+*/

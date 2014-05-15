@@ -11,7 +11,7 @@
 *****                                                                                          *****
 ***************************************************************************************************/
 
-/*
+
 
 #include "Main.h"
 
@@ -66,7 +66,7 @@ int main( int argc, char* argv[] )
 		
 		cout << "Reading next image" << endl;
 		// Get oldest (or whatever) image from specified folder
-		rgbImage *Input = readImageFile("" + inputFolder); // TODO: fix to other function
+		rgbImage *Input = readImageFile("" + inputFolder + "2014-04-28_15-13-41_w2592h1936.rgb"); // TODO: fix to other function
 		cout << "Read next image" << endl;
 
 
@@ -74,15 +74,23 @@ int main( int argc, char* argv[] )
 		if (mode == "rgbchannels")
 		{
 			cout << "Detecting edges on image (rgbchannels)" << endl;
+			double startTime = omp_get_wtime();
 			edgeImage = templateDetectRGBChannels(Input, posWeight, negWeight,
 					highThreshold, lowThreshold);
+			double endTime = omp_get_wtime();
+			double runTime = endTime-startTime;
+			printf("startTime: %f; endTime: %f; Execution time: %f\n", startTime, endTime, runTime);
 			cout << "Detected edges on image (rgbchannels)" << endl;
 		}
 		else if (mode == "grayscale")
 		{
 			cout << "Detecting edges on image (grayscale)" << endl;
+			double startTime = omp_get_wtime();
 			edgeImage = templateDetectGrayscale(Input, posWeight, negWeight,
 					highThreshold, lowThreshold);
+			double endTime = omp_get_wtime();
+			double runTime = endTime-startTime;
+			printf("startTime: %f; endTime: %f; Execution time: %f\n", startTime, endTime, runTime);
 			cout << "Detected edges on image (grayscale)" << endl;
 		}
 		
@@ -138,4 +146,3 @@ int main( int argc, char* argv[] )
 
 }
 
-*/
